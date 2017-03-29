@@ -27,22 +27,6 @@ Java-Aio network transfer library base on LMAX-Disruptor
      +---------------------------------------------------------------+
     
 ### Detail:
-**Type:** 1bit 0x0 Direct        0x1 Cluster
-
-**RSV:**  1bit 0x0 MSG_ID        0x1 no MSG_ID
-
-**PRS:**  1bit 0x0 no compress   0x1 compress
-
-**CRPT:** 1bit 0x0 plain         0x1 cipher
-
-**Version:** 4bit 1~0xF
-
-**CMD-ID:** 8bit unsigned byte 1-255
-
-**MSG-ID:** 64bit  16bit clusterId  27bit timestamp(second) 21bit sequence
-
-**Charset:** 4bit 
-
 ```
 ASCII       = 0x00
 UTF_8       = 0x01
