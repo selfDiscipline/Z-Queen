@@ -27,6 +27,14 @@ Java-Aio network transfer library base on LMAX-Disruptor
      +---------------------------------------------------------------+
     
 ### Detail:
+* **Type:** *1bit* `0x00` Direct `0x01` Cluster
+* **RSV:** *1bit* `0x00` MSG_ID `0x01` no MSG_ID
+* **PRS:** *1bit* `0x00` no compress `0x01` compress
+* **CRPT:** *1bit* `0x00` plain `0x01` cipher
+* **Version:** *4bit* `1~0xF`
+* **CMD-ID:** *8bit* unsigned byte `1~0xFF`
+* **MSG-ID:** *64bit*  16bit clusterId  27bit timestamp(second) 21bit sequence
+* **Charset:** *4bit*
 ```
 ASCII       = 0x00
 UTF_8       = 0x01
@@ -40,8 +48,8 @@ ISO_8859_1  = 0x08
 ISO_8859_15 = 0x09
 ……
 ```
-**Serial-Type:** 4bit payload serializion formatter 0x0 binary 0x1 proxy－transparent 0x2 JSON 0x3 XML
+* **Serial-Type:** 4bit payload serializion formatter `0x00` binary `0x01` proxy－transparent `0x02` JSON `0x03` XML
 
-**CRC32:** CRC32（payload-data）
+* **CRC32:** CRC32（payload-data）
 
-**Websoket-payload-length:** 7(no MSG-ID) | 15(MSG-ID) + Payload-data-length
+* **Websoket-payload-length:** 7(no MSG-ID) | 15(MSG-ID) + Payload-data-length
