@@ -1,0 +1,102 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017 Z-Chess
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package com.tgx.zq.z.queen.base.disruptor.inf;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.InsufficientCapacityException;
+import com.lmax.disruptor.RingBuffer;
+
+public interface IPipeEventHandler<T extends IEvent, R extends IEvent>
+        extends
+        EventHandler<T>
+{
+
+    Logger log = Logger.getLogger(IPipeEventHandler.class.getSimpleName());
+
+    default <V, A> boolean tryPublish(RingBuffer<R> publisher, IEventOp.Type t, V v, A a, IEventOp<V, A> operator) {
+        if (publisher == null) return true;
+        try {
+            long sequence = publisher.tryNext();
+            try {
+                R event = publisher.get(sequence);
+                event.produce(t, v, a, operator);
+                return true;
+            }
+            finally {
+                publisher.publish(sequence);
+            }
+        }
+        catch (InsufficientCapacityException e) {
+            log.log(Level.FINEST, " Content: " + v + " - " + a);
+        }
+        return false;
+    }
+
+    default <V, A> void publish(RingBuffer<R> publisher, IEventOp.Type t, V v, A a, IEventOp<V, A> operator) {
+        if (publisher == null) return;
+        long sequence = publisher.next();
+        try {
+            R event = publisher.get(sequence);
+            event.produce(t, v, a, operator);
+        }
+        finally {
+            publisher.publish(sequence);
+        }
+    }
+
+    default <V, A> boolean tryError(RingBuffer<R> publisher, IError.Type t, V v, A a, IEventOp<V, A> operator) {
+        if (publisher == null) return true;
+        try {
+            long sequence = publisher.tryNext();
+            try {
+                R event = publisher.get(sequence);
+                event.error(t, v, a, operator);
+                return true;
+            }
+            finally {
+                publisher.publish(sequence);
+            }
+        }
+        catch (InsufficientCapacityException e) {
+            log.log(Level.FINEST, " Content: " + v + " - " + a);
+        }
+        return false;
+    }
+
+    default <V, A> void error(RingBuffer<R> publisher, IError.Type t, V v, A a, IEventOp<V, A> operator) {
+        if (publisher == null) return;
+        long sequence = publisher.next();
+        try {
+            R event = publisher.get(sequence);
+            event.error(t, v, a, operator);
+        }
+        finally {
+            publisher.publish(sequence);
+        }
+    }
+
+}
