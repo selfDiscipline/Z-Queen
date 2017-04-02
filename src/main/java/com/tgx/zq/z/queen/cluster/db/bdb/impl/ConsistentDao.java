@@ -31,13 +31,8 @@ import com.sleepycat.bind.EntryBinding;
 import com.sleepycat.bind.tuple.IntegerBinding;
 import com.sleepycat.bind.tuple.LongBinding;
 import com.sleepycat.collections.StoredMap;
-import com.sleepycat.je.Database;
-import com.sleepycat.je.DatabaseConfig;
-import com.sleepycat.je.DatabaseEntry;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.SecondaryConfig;
-import com.sleepycat.je.SecondaryDatabase;
-import com.sleepycat.je.SecondaryKeyCreator;
+import com.sleepycat.collections.StoredSortedMap;
+import com.sleepycat.je.*;
 import com.tgx.zq.z.queen.base.util.Pair;
 import com.tgx.zq.z.queen.cluster.replication.bean.raft.LogEntry;
 import com.tgx.zq.z.queen.cluster.replication.bean.raft.MetaEntry;
@@ -46,29 +41,27 @@ import com.tgx.zq.z.queen.db.bdb.inf.IDbStorageProtocol;
 
 public class ConsistentDao<E extends IDbStorageProtocol>
 {
-    private final Environment                    _Environment;
-    private final long                           nodeId;
-    Logger                                       logger = Logger.getLogger(getClass().getSimpleName());
-    private Database                             mLogMetaDB;
-    private Database                             mLogDB;
-    private SecondaryDatabase                    mLogIdempotentDB;
-    private Database                             mLogSnapshotDB;
-    private Database                             mClientLogDB;
-    private SecondaryDatabase                    mClientLogIdempotentDB;
+    private final Environment                       _Environment;
+    private final long                              nodeId;
+    private Logger                                  log = Logger.getLogger(getClass().getSimpleName());
+    private Database                                mLogMetaDB;
+    private Database                                mLogDB;
+    private SecondaryDatabase                       mLogIdempotentDB;
+    private Database                                mLogSnapshotDB;
+    private Database                                mClientLogDB;
+    private SecondaryDatabase                       mClientLogIdempotentDB;
 
-    private StoredMap<Long, MetaEntry>           mLogMetaMap;
-    private StoredMap<Long, LogEntry<E>>         mLogMap;
-    private StoredMap<Long, LogEntry<E>>         mLogIdempotentMap;
-    private StoredMap<Integer, SnapShotEntry<E>> mLogSnapshotMap;
-    private StoredMap<Long, LogEntry<E>>         mClientLogIdempotentMap;
-    private StoredMap<Long, LogEntry<E>>         mClientLogMap;
-    private MetaEntry                            mMetaEntry;
-    private volatile boolean                     vClosed;
+    private StoredMap<Long, MetaEntry>              mLogMetaMap;
+    private StoredMap<Long, LogEntry<E>>            mLogMap;
+    private StoredMap<Long, LogEntry<E>>            mLogIdempotentMap;
+    private StoredMap<Long, LogEntry<E>>            mClientLogIdempotentMap;
+    private StoredMap<Long, LogEntry<E>>            mClientLogMap;
+    private StoredSortedMap<Long, SnapShotEntry<E>> mLogSnapshotMap;
+    private MetaEntry                               mMetaEntry;
 
     public ConsistentDao(Environment env, long nodeId) {
         this.nodeId = nodeId;
         LongBinding longBinding = new LongBinding();
-        IntegerBinding integerBinding = new IntegerBinding();
         LogEntry.LogEntryBinding<E> leb = new LogEntry.LogEntryBinding<>();
         _Environment = env;
         try {
@@ -86,17 +79,15 @@ public class ConsistentDao<E extends IDbStorageProtocol>
             mClientLogIdempotentDB = _Environment.openSecondaryDatabase(null, dbName + ".client.secondary", mClientLogDB, dbsConfig);
 
             mLogMetaMap = new StoredMap<>(mLogMetaDB, longBinding, new MetaEntry.MetaEntryBinding(), true);
-            mLogSnapshotMap = new StoredMap<>(mLogSnapshotDB, integerBinding, new SnapShotEntry.SnapShotEntryBinding<>(), true);
+            mLogSnapshotMap = new StoredSortedMap<>(mLogSnapshotDB, longBinding, new SnapShotEntry.SnapShotEntryBinding<>(), true);
             mLogMap = new StoredMap<>(mLogDB, longBinding, leb, true);
             mLogIdempotentMap = new StoredMap<>(mLogIdempotentDB, longBinding, leb, true);
             mClientLogMap = new StoredMap<>(mClientLogDB, longBinding, leb, true);
             mClientLogIdempotentMap = new StoredMap<>(mClientLogIdempotentDB, longBinding, leb, true);
-            vClosed = false;
         }
         catch (Exception e) {
             e.printStackTrace();
-            vClosed = true;
-            logger.log(Level.FINE, "open db error", e);
+            log.log(Level.FINE, "open db error", e);
         }
     }
 
@@ -200,7 +191,7 @@ public class ConsistentDao<E extends IDbStorageProtocol>
         if (slotIndex > mMetaEntry.lastCommittedSlotIndex) {
             LogEntry<E> logEntry = mLogMap.get(slotIndex);
             if (logEntry == null) {
-                logger.warning("slot has no entry");
+                log.warning("slot has no entry");
                 return false;
             }
             logEntry.commit();
@@ -225,19 +216,28 @@ public class ConsistentDao<E extends IDbStorageProtocol>
     }
 
     public void close() {
-        if (vClosed) return;
-        vClosed = true;
-        if (mLogMap != null) mLogMap.clear();
-        if (mLogIdempotentMap != null) mLogIdempotentMap.clear();
-        if (mLogMetaMap != null) mLogMetaMap.clear();
-        if (mLogSnapshotMap != null) mLogSnapshotMap.clear();
-        if (mClientLogMap != null) mClientLogMap.clear();
-        if (mClientLogIdempotentMap != null) mClientLogIdempotentMap.clear();
-        if (mLogDB != null) mLogDB.close();
-        if (mLogMetaDB != null) mLogMetaDB.close();
-        if (mLogSnapshotDB != null) mLogSnapshotDB.close();
-        if (mClientLogDB != null) mClientLogDB.close();
-        if (_Environment != null) _Environment.close();
+        try {
+            if (mLogDB != null) mLogDB.close();
+            if (mLogMetaDB != null) mLogMetaDB.close();
+            if (mLogSnapshotDB != null) mLogSnapshotDB.close();
+            if (mClientLogDB != null) mClientLogDB.close();
+        }
+        catch (DatabaseException e) {
+            log.log(Level.WARNING, "cluster consistent dao.database close error ", e);
+        }
+        finally {
+            try {
+                if (_Environment != null) {
+                    _Environment.sync();
+                    _Environment.cleanLog();
+                    _Environment.close();
+                }
+            }
+            catch (DatabaseException e) {
+                log.log(Level.SEVERE, "cluster consistent dao.env close error ", e);
+            }
+        }
+
     }
 
     private class LogIdempotentSecondaryKeyCreator

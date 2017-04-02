@@ -34,6 +34,7 @@ import com.tgx.zq.z.queen.base.util.Configuration;
 import com.tgx.zq.z.queen.base.util.IPParser;
 import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.client.socket.aio.AioSingleClient;
+import com.tgx.zq.z.queen.client.socket.aio.AioSingleClient.IChannelLogic;
 import com.tgx.zq.z.queen.db.bdb.impl.BerkeleyDBEnv;
 import com.tgx.zq.z.queen.io.impl.AioCreator;
 import com.tgx.zq.z.queen.io.impl.AioSession;
@@ -52,7 +53,6 @@ import com.tgx.zq.z.queen.io.ws.protocol.bean.mq.X81_MqTopicRegResult;
 import com.tgx.zq.z.queen.mq.operations.MQ_READ;
 
 class InnerMqClient
-
 {
     private final static String   ConfigFileName = "MqClientConfig";
     private final BerkeleyDBEnv   _MqEnv;
@@ -253,7 +253,7 @@ class InnerMqClient
         _MqClient.publish(content);
     }
 
-    public void registerChannel(AioSingleClient.IChannelLogic logic) {
+    public void registerChannel(IChannelLogic logic) {
         _MqClient.addChannel(logic);
     }
 }

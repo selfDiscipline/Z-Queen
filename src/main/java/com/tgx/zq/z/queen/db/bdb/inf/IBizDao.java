@@ -28,11 +28,13 @@ import com.sleepycat.je.Environment;
 
 public interface IBizDao<E extends IDbStorageProtocol>
 {
+    void close();
+
     void put(E entity);
 
     E get(E entity);
 
-    Environment getEnv();
-
     boolean contains(long primaryKey, long secondaryKey, byte[] secondaryKeyArray);
+
+    Environment getEnv();
 }
