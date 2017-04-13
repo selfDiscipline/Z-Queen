@@ -48,8 +48,12 @@ ISO_8859_1  = 0x08
 ISO_8859_15 = 0x09
 ……
 ```
-* **Serial-Type:** 4bit payload serializion formatter `0x00` binary `0x01` proxy－transparent `0x02` JSON `0x03` XML
+* **Serial-Type:** 4bit payload serialization formatter `0x00` binary `0x01` proxy－transparent `0x02` JSON `0x03` XML
 
 * **CRC32:** CRC32（payload-data）
 
 * **Websoket-payload-length:** 7(no MSG-ID) | 15(MSG-ID) + Payload-data-length
+
+
+## Cluster API
+* Idempotent `Cluster-Node hasn't consistent client for sending entity. If entity has an idempotent attribute, it should be handled by yourself.`
