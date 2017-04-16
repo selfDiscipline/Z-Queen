@@ -152,9 +152,7 @@ public class MetaEntry
 
         @Override
         public void objectToEntry(MetaEntry object, DatabaseEntry entry) {
-            byte[] data = object.encode();
-            object.dispose();
-            entry.setData(data);
+            entry.setData(object.encode());
         }
 
     }

@@ -32,7 +32,9 @@ import com.tgx.zq.z.queen.base.disruptor.inf.IEventOp;
 import com.tgx.zq.z.queen.base.disruptor.inf.IEventOp.Type;
 import com.tgx.zq.z.queen.base.disruptor.inf.IPipeEventHandler;
 import com.tgx.zq.z.queen.base.util.Pair;
+import com.tgx.zq.z.queen.base.util.TimeUtil;
 import com.tgx.zq.z.queen.base.util.Triple;
+import com.tgx.zq.z.queen.cluster.node.ClusterNode;
 import com.tgx.zq.z.queen.io.disruptor.operations.CLOSE_ERROR_OPERATOR;
 import com.tgx.zq.z.queen.io.inf.ICommand;
 import com.tgx.zq.z.queen.io.inf.IDestine;
@@ -91,6 +93,7 @@ public class ReadDispatchHandler
                         }
                         else if (cResult.equals(RESULT.IGNORE) && lResult.equals(RESULT.IGNORE)) {
                             log.info("wait to handle: " + cmd);
+                            cmd.setTransactionKey(ClusterNode.getNextMsgUid());
                             tryPublish(mLogicRB[(int) (sequence & mLogicIndexMask)], Type.LOGIC, cmd, session, triple.third());
                         }
                         else {

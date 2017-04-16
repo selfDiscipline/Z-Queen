@@ -77,6 +77,7 @@ public interface ILeader<E extends IDbStorageProtocol>
                                    long nodeId,
                                    long termId,
                                    long slotIndex,
+                                   long lastCommittedSlotIndex,
                                    long[] newConfig);
 
     long getIdentity();
@@ -95,4 +96,5 @@ public interface ILeader<E extends IDbStorageProtocol>
 
     void revertFollower();
 
+    void init();
 }

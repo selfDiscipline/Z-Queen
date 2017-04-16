@@ -50,4 +50,6 @@ public interface IClient<E extends IDbStorageProtocol>
     long getClientSlotIndex();
 
     long getClientNextSlot();
+
+    void setClientSlotIndex(long slotIndex);
 }

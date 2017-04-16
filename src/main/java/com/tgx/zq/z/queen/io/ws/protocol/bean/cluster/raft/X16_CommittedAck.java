@@ -26,21 +26,21 @@ package com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft;
 
 import com.tgx.zq.z.queen.base.util.IoUtil;
 
-public class X1B_CommittedAck
+public class X16_CommittedAck
         extends
         X1X_ClusterExchange
 {
-    public final static int COMMAND = 0x1B;
+    public final static int COMMAND = 0x16;
     public long             clientSlotIndex;
     public boolean          leaderAck;
 
-    public X1B_CommittedAck(long mMsgUID, long nodeId, long termId, long slotIndex, long clientSlotIndex) {
+    public X16_CommittedAck(long mMsgUID, long nodeId, long termId, long slotIndex, long clientSlotIndex) {
         super(COMMAND, mMsgUID, nodeId, termId, slotIndex);
         this.clientSlotIndex = clientSlotIndex;
 
     }
 
-    public X1B_CommittedAck() {
+    public X16_CommittedAck() {
         super(COMMAND);
     }
 

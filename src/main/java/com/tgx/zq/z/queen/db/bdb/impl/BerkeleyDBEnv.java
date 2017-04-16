@@ -72,10 +72,14 @@ public class BerkeleyDBEnv
 
     public void close() {
         try {
-            if (mEnvironment != null) mEnvironment.close();
+            if (mEnvironment != null && !mEnvironment.isClosed()) {
+                mEnvironment.sync();
+                mEnvironment.cleanLog();
+                mEnvironment.close();
+            }
         }
         catch (Exception e) {
-            log.log(Level.FINER, e.getMessage(), e);
+            log.log(Level.FINER, "close bdb environment error", e);
         }
     }
 

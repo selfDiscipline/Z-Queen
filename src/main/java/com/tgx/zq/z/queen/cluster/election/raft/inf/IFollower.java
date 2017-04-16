@@ -56,6 +56,8 @@ public interface IFollower<E extends IDbStorageProtocol>
 
     void setStatus(RaftStatus status);
 
+    void setCommittedSlotIndex(long lastCommittedTermId, long lastCommittedSlotIndex);
+
     ICommand onReceiveEntity(long leaderId, long lastCommittedSlotIndex, LogEntry<E> entry);
 
     ICommand onReceiveCommit(long leaderId, long termId, long slotIndex, long idempotent);

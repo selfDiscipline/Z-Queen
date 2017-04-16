@@ -26,23 +26,31 @@ package com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft;
 
 import com.tgx.zq.z.queen.base.util.IoUtil;
 
-public class X13_EntryAck
+public class X18_ClientEntryAck
         extends
         X1X_ClusterExchange
 {
-    public final static int COMMAND = 0x13;
-    public long             nextIndex, lastCommittedSlotIndex;
+    public final static int COMMAND = 0x18;
+    public long             clientSlotIndex, lastCommittedSlotIndex;
     public boolean          accept, qualify;
 
-    public X13_EntryAck() {
+    public X18_ClientEntryAck() {
         super(COMMAND);
     }
 
-    public X13_EntryAck(long mMsgUID, long nodeId, long termId, long slotIndex, boolean accept, boolean qualify) {
+    public X18_ClientEntryAck(long mMsgUID,
+                              long nodeId,
+                              long termId,
+                              long slotIndex,
+                              long clientSlotIndex,
+                              long lastCommittedSlotIndex,
+                              boolean accept,
+                              boolean qualify) {
         super(COMMAND, mMsgUID, nodeId, termId, slotIndex);
         this.accept = accept;
         this.qualify = qualify;
-        nextIndex = -1;
+        this.clientSlotIndex = clientSlotIndex;
+        this.lastCommittedSlotIndex = lastCommittedSlotIndex;
     }
 
     @Override
@@ -52,7 +60,7 @@ public class X13_EntryAck
 
     @Override
     public int decodec(byte[] data, int pos) {
-        nextIndex = IoUtil.readLong(data, pos);
+        clientSlotIndex = IoUtil.readLong(data, pos);
         pos += 8;
         lastCommittedSlotIndex = IoUtil.readLong(data, pos);
         pos += 8;
@@ -64,7 +72,7 @@ public class X13_EntryAck
 
     @Override
     public int encodec(byte[] data, int pos) {
-        pos += IoUtil.writeLong(nextIndex, data, pos);
+        pos += IoUtil.writeLong(clientSlotIndex, data, pos);
         pos += IoUtil.writeLong(lastCommittedSlotIndex, data, pos);
         pos += IoUtil.writeByte((accept ? 1 : 0) | (qualify ? 2 : 0), data, pos);
         return super.encodec(data, pos);
@@ -78,10 +86,10 @@ public class X13_EntryAck
                  .append(CRLFTAB)
                  .append(qualify ? "qualify" : "disqualify")
                  .append(CRLFTAB)
-                 .append("next index: ")
-                 .append(nextIndex)
+                 .append("client slot index: ")
+                 .append(clientSlotIndex)
                  .append(CRLFTAB)
-                 .append("last committed slot: ")
+                 .append("leader last committed slot index")
                  .append(lastCommittedSlotIndex)
                  .append(CRLF)
                  .toString();

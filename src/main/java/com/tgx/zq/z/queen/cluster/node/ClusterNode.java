@@ -97,13 +97,11 @@ import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X10_StartElection;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X11_Ballot;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X12_AppendEntity;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X13_EntryAck;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X15_JointConsensus;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X16_ConfigAck;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X17_CommittedConfig;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X18_LeadLease;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X19_LeaseAck;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1A_CommitEntry;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1C_ClientEntry;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X15_CommitEntry;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X17_ClientEntry;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X18_ClientEntryAck;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X19_LeadLease;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1A_LeaseAck;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X102_Ping;
 
 public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN extends BizNode<E, D>>
@@ -141,6 +139,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     private final Set<Long>                  _NewElectionBallotSet          = new TreeSet<>();
     private final Map<Long, Integer>         _SlotNewMajorityAppendCountMap = new HashMap<>(1 << 8);
     private final Map<Long, Integer>         _SlotOldMajorityAppendCountMap = new HashMap<>(1 << 8);
+    private final TaskService                _TaskService                   = TaskService.getInstance();
     private InetSocketAddress                mLocalAddress;
     private AsynchronousServerSocketChannel  mServerChannel;
     private BN                               mBizNode;
@@ -175,6 +174,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     private long                             mClientNextSlot;
     private boolean                          mIsJointConsensus;
     private RaftStatus                       mStatus                        = RaftStatus.DISCOVER_WAIT;
+    private boolean                          mIsSingleMode                  = true;
     private volatile long                    vLeaseTimeout;
     private volatile long                    vLeaderLeaseTimeout;
     private volatile long                    vRandomWaitTimeout;
@@ -189,11 +189,11 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
         _BizDao = bizDao;
         _Dao = new ConsistentDao<>(bizDao.getEnv(), getIdentity());
         _PortChannelTimerTick = new long[2][getConfig_PortChannelCapacity()];
-        setLocalAddress(new InetSocketAddress(getConfig_LocalHostAddress(), getConfig_ClusterPort()));
         _BindSerial = hashCode();
+        _TaskService.addListener(this);
+        setLocalAddress(new InetSocketAddress(getConfig_LocalHostAddress(), getConfig_ClusterPort()));
         ElectTimer.NODE_EXCHANGE_TIMEOUT = getConfig_ExchangeTimeout();
         ElectTimer.NODE_LEASE_TIMEOUT = getConfig_LeaseTimeout();
-        TaskService.getInstance().addListener(this);
     }
 
     // -------------------------------------------------------------------------------------------------------------------/
@@ -300,10 +300,13 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
         }
     }
 
+    public final static long getNextMsgUid() {
+        return getConfig_XID() | TimeUtil.getUID16YearCollision2M();
+    }
     /*--------------------------------------------------------IElector--------------------------------------------------*/
 
-    public static long getUniqueIdentity(long sequence) {
-        return getConfig_XID() | TimeUtil.getUID16YearCollision2M() | (sequence & QueenCode.UID_SEQ_21_MK);
+    public static long getUniqueIdentity() {
+        return getConfig_XID() | TimeUtil.getUID16Year2TypeCollision1M();
     }
 
     public static void parseParams(String[] args) {
@@ -580,7 +583,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     }
 
     private void clusterHeartbeat() {
-        TaskService.getInstance().requestService(new TimerTask(ElectTimer.NODE_LEADER_LEASE_SAP >> 1, TimeUnit.MILLISECONDS)
+        _TaskService.requestService(new TimerTask(ElectTimer.NODE_LEADER_LEASE_SAP >> 1, TimeUnit.MILLISECONDS)
         {
             @Override
             protected boolean doTimeMethod() {
@@ -599,7 +602,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     public String toString() {
         String CRLF = "\r\n", CRLFTAB = "\r\n\t";
         StringBuilder sb = new StringBuilder(CRLF);
-        sb.append("ClusterNode:")
+        sb.append(" ClusterNode: ")
           .append(Long.toHexString(getIdentity()))
           .append(" Majority: ")
           .append(_Majority.get())
@@ -691,22 +694,21 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
         return consistent;
     }
 
-    private void onDiscoverTimeout() {
+    private void jointConsistent() {
         log.info("discover time out on leader-> to joint consensus");
-        localEvent(new XF002_ClusterLocal(X15_JointConsensus.COMMAND));
+        localEvent(new XF002_ClusterLocal(X12_AppendEntity.COMMAND));
     }
 
     @Override
     public void waitDiscoverNode() {
         ElectTimer timer = new ElectTimer(getCurrentStage(), this, ElectTimer.NODE_DISCOVER_TIMEOUT)
         {
-
             @Override
             public int getSerialNum() {
                 return NODE_DISCOVER_TIMER;
             }
         };
-        vNodeDiscoverTimeout = TaskService.getInstance().requestTimerService(timer, getBindSerial());
+        vNodeDiscoverTimeout = _TaskService.requestTimerService(timer, getBindSerial());
         log.info("Discover node timeout->@ " + TimeUtil.printTime(vNodeDiscoverTimeout));
     }
 
@@ -718,7 +720,6 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
             if (nodeEntity == null) {
                 _NewNodesStateMap.put(identity, nodeEntity = new NodeEntity(identity));
                 waitDiscoverNode();
-                changeStage(RaftStage.DISCOVER, RaftStage.FOLLOWER);
             }
         }
         nodeEntity.sessionIncrement();
@@ -727,11 +728,10 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     private void sapConnect(String address) {
         for (int i = 0, size = getConfig_PortChannelCapacity(); i < size; i++) {
             AioConnector connector = new AioConnector(this, OPERATION_MODE.CONNECT_CLUSTER, getConfig_LocalHostAddress(), 0, i, address);
-            _PortChannelTimerTick[0][i] = TaskService.getInstance()
-                                                     .requestTimerService(connector.new NoHaTimer((_Random.nextInt() & Integer.MAX_VALUE)
-                                                                                                  % ElectTimer.NODE_CONNECT_SAP,
-                                                                                                  _PortChannelTimerTick[0]),
-                                                                          getBindSerial());
+            _PortChannelTimerTick[0][i] = _TaskService.requestTimerService(connector.new NoHaTimer((_Random.nextInt() & Integer.MAX_VALUE)
+                                                                                                   % ElectTimer.NODE_CONNECT_SAP,
+                                                                                                   _PortChannelTimerTick[0]),
+                                                                           getBindSerial());
         }
     }
 
@@ -749,7 +749,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                 return NODE_DISMISS_TIMER;
             }
         };
-        vNodeDismissTimeout = TaskService.getInstance().requestTimerService(timer, getBindSerial());
+        vNodeDismissTimeout = _TaskService.requestTimerService(timer, getBindSerial());
         log.info("Dismiss node timeout->@ " + TimeUtil.printTime(vNodeDismissTimeout));
     }
 
@@ -796,7 +796,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     }
 
     private void commitNewConfig() {
-        localEvent(new XF002_ClusterLocal(X17_CommittedConfig.COMMAND));
+        localEvent(new XF002_ClusterLocal(X15_CommitEntry.COMMAND));
     }
 
     @Override
@@ -805,11 +805,11 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     }
 
     @Override
-    public void changeStage(RaftStage previous, RaftStage next) {
-        if (stageLock(previous)) return;
+    public boolean changeStage(RaftStage previous, RaftStage next) {
         for (;;) {
-            if (_Stage.get().equals(next) || _Stage.compareAndSet(previous, next)) break;
-            if (!_Stage.get().equals(previous)) return;
+            if (checkCurrentStage(next)) return true;
+            if (_Stage.compareAndSet(previous, next)) break;
+            if (!checkCurrentStage(previous)) return false;
         }
         switch (next) {
             case FOLLOWER:
@@ -819,12 +819,12 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                 proposal();
                 break;
             case LEADER:
-                mBallotId = getIdentity();
                 leaderLease();
+                init();
             default:
                 break;
         }
-        log.info(toString());
+        return true;
     }
 
     @Override
@@ -864,9 +864,15 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     }
 
     @Override
+    public void setClientSlotIndex(long slotIndex) {
+        mClientSlotIndex = slotIndex;
+        mClientNextSlot = mClientSlotIndex + 1;
+    }
+
+    @Override
     public List<ICommand> sendEntry(IBroadcast<WsContext> broadcast, List<ICommand> wList, long leaderId, LogEntry<E> logEntity) {
         if (logEntity != null) {
-            X1C_ClientEntry x1C = new X1C_ClientEntry(logEntity.idempotent, getIdentity(), getCurrentTermId(), getClientSlotIndex());
+            X17_ClientEntry x1C = new X17_ClientEntry(logEntity.idempotent, getIdentity(), getCurrentTermId(), getClientSlotIndex());
             x1C.setPayload(logEntity);
             broadcast.sendDirect(wList, x1C, leaderId);
             log.info("client: " + getIdentity() + "\tsend log entry to leader: " + leaderId + "\t" + logEntity.toString());
@@ -881,6 +887,8 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                                       long leaderSlotIndex,
                                       long leaderLastCommittedSlotIndex,
                                       long clientSlotIndex) {
+        revertFollower(leaderId);
+        _Dao.transferLogEntry(clientSlotIndex, leaderSlotIndex, leaderTermId);
         if (!checkConsistent(leaderTermId, leaderSlotIndex)) {
             X13_EntryAck x13 = new X13_EntryAck(getNewMsgUid(),
                                                 getIdentity(),
@@ -890,13 +898,12 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                                                 isQualify(leaderSlotIndex));
             x13.nextIndex = getLastCommittedSlotIndex() + 1;
             return x13;
-
         }
         if (getLastCommittedSlotIndex() < leaderLastCommittedSlotIndex) {
             for (long slotIndex = getLastCommittedSlotIndex(); slotIndex <= leaderLastCommittedSlotIndex; slotIndex++)
                 if (_Dao.commitEntry(slotIndex)) {
-                    mLastCommittedSlotIndex = slotIndex;
-                    mLastCommittedTermId = _Dao.getLastCommittedTerm(getIdentity());
+                    LogEntry<E> cLogEntry = _Dao.getEntryBySlotIndex(slotIndex);
+                    setCommittedSlotIndex(cLogEntry.termId, cLogEntry.slotIndex);
                 }
                 else {
                     X13_EntryAck x13 = new X13_EntryAck(getNewMsgUid(),
@@ -909,7 +916,6 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                     return x13;
                 }
         }
-        _Dao.transferLogEntry(clientSlotIndex, leaderSlotIndex, leaderTermId);
         setSlotIndex(leaderTermId, leaderSlotIndex);
         return new X13_EntryAck(getNewMsgUid(), getIdentity(), leaderTermId, leaderSlotIndex, true, true);
     }
@@ -926,16 +932,19 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                 sendEntry = true;
             case CANDIDATE:
                 setStatus(RaftStatus.CLIENT_RECEIVED);
-                mClientSlotIndex = _Dao.appendClientEntry(logEntry);
-                mClientNextSlot = mClientSlotIndex + 1;
+                setClientSlotIndex(_Dao.appendClientEntry(logEntry));
                 if (sendEntry) sendEntry(this, wList, getBallotId(), logEntry);
                 break;
             case LEADER:
-                setStatus(RaftStatus.LEADER_APPEND);
                 logEntry.slotIndex = getNextSlot();
                 _Dao.appendEntry(logEntry);
                 setSlotIndex(logEntry.termId, logEntry.slotIndex);
-                broadcastEntry(this, wList, getIdentity(), getIdentity(), getLastCommittedSlotIndex(), logEntry);
+                setStatus(RaftStatus.LEADER_APPEND);
+                if (mIsSingleMode) {
+                    _Dao.commitEntry(logEntry.slotIndex);
+                    wList.add(new XF001_TransactionCompleted(storage.getPrimaryKey()));
+                }
+                else broadcastEntry(this, wList, getIdentity(), getIdentity(), getLastCommittedSlotIndex(), logEntry);
                 log.info("leader broadcast entry: " + logEntry.toString());
                 break;
             default:
@@ -945,6 +954,12 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     }
 
     /*-----------------------------------------------------ILeader------------------------------------------------------*/
+
+    @Override
+    public void init() {
+        _SlotOldMajorityAppendCountMap.clear();
+        _SlotNewMajorityAppendCountMap.clear();
+    }
 
     @Override
     public long getNextSlot() {
@@ -959,7 +974,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
         LogEntry<E> logEntry = _Dao.getEntryByIdempotent(entity.idempotent);
 
         if (logEntry != null && logEntry.isCommitted()) {
-            X1A_CommitEntry x1A = new X1A_CommitEntry(getNewMsgUid(),
+            X15_CommitEntry x1A = new X15_CommitEntry(getNewMsgUid(),
                                                       getIdentity(),
                                                       logEntry.getTermId(),
                                                       logEntry.getSlotIndex(),
@@ -980,6 +995,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                 entity.slotIndex = getNextSlot();
                 _Dao.appendEntry(entity);
                 setSlotIndex(entity.getTermId(), entity.getSlotIndex());
+                setStatus(RaftStatus.LEADER_APPEND);
                 log.info("leader append entry -> " + entity.toString());
                 broadcastEntry(this, wList, getIdentity(), followerId, getLastCommittedSlotIndex(), entity);
                 slotIndex = entity.getSlotIndex();
@@ -989,12 +1005,15 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                 slotIndex = logEntry.getSlotIndex();
                 termId = logEntry.getTermId();
             }
-            X13_EntryAck x13 = new X13_EntryAck(getNewMsgUid(), getIdentity(), termId, slotIndex, true, true);
-            x13.clientSlotIndex = clientSlotIndex;
-            x13.leaderAck = true;
-            wList.add(x13);
+            wList.add(new X18_ClientEntryAck(getNewMsgUid(),
+                                             getIdentity(),
+                                             termId,
+                                             slotIndex,
+                                             clientSlotIndex,
+                                             getLastCommittedSlotIndex(),
+                                             true,
+                                             true));
         }
-
         return wList;
     }
 
@@ -1022,62 +1041,58 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
         if (qualify) {
             if (accept) {
                 if (mIsJointConsensus) {
-                    boolean commitOld = false, commitNew = false;
+                    boolean commitOld, commitNew;
                     if (slotIndex > getLastCommittedSlotIndex()) {
                         NodeEntity nodeEntity = _NewNodesStateMap.get(followerId);
                         if (nodeEntity.getAppendSlotIndex() < slotIndex) {
                             nodeEntity.setAppendSlotIndex(slotIndex);
                             int previous = _SlotNewMajorityAppendCountMap.get(slotIndex) == null ? 0
                                                                                                  : _SlotNewMajorityAppendCountMap.get(slotIndex);
-                            if (previous + 1 < _NewMajority.get()) _SlotNewMajorityAppendCountMap.put(slotIndex, previous + 1);
-                            else {
-                                commitNew = true;
-                                log.info("committed new config slot index:  " + slotIndex);
-                            }
+                            _SlotNewMajorityAppendCountMap.put(slotIndex, previous + 1);
+                            commitNew = previous + 1 >= _NewMajority.get();
+                            log.info("committed new config slot index:  " + slotIndex);
                         }
-                        else commitNew = _SlotNewMajorityAppendCountMap.get(slotIndex) >= _NewMajority.get();
+                        else return wList;
 
                         nodeEntity = _OldNodesStateMap.get(followerId);
                         if (nodeEntity.getAppendSlotIndex() < slotIndex) {
                             nodeEntity.setAppendSlotIndex(slotIndex);
                             int previous = _SlotOldMajorityAppendCountMap.get(slotIndex) == null ? 0
                                                                                                  : _SlotOldMajorityAppendCountMap.get(slotIndex);
-                            if (previous + 1 < _Majority.get()) _SlotOldMajorityAppendCountMap.put(slotIndex, previous + 1);
-                            else {
-                                commitOld = true;
-                                log.info("committed old config slot index:  " + slotIndex);
-                            }
-
+                            _SlotOldMajorityAppendCountMap.put(slotIndex, previous + 1);
+                            commitOld = previous + 1 >= _Majority.get();
+                            log.info("committed old config slot index:  " + slotIndex);
                         }
-                        else commitOld = _SlotOldMajorityAppendCountMap.get(slotIndex) >= _Majority.get();
+                        else return wList;
                         if (commitNew && commitOld) {
                             if (_Dao.commitEntry(slotIndex)) {
+                                setCommittedSlotIndex(termId, slotIndex);
                                 LogEntry<E> logEntry = _Dao.getEntryBySlotIndex(slotIndex);
-                                Pair<Long, Long> update = _Dao.getLastCommitted(getIdentity());
-                                mLastCommittedSlotIndex = update.first();
-                                mLastCommittedTermId = update.second();
-                                log.info("committed slot index: " + slotIndex);
+                                log.info("join consensus committed slot index: " + slotIndex);
                                 broadcastCommit(this,
                                                 wList,
                                                 getIdentity(),
                                                 logEntry.getTermId(),
                                                 logEntry.getSlotIndex(),
                                                 logEntry.idempotent);
+                                E entry = logEntry.getPayload();
+                                _BizDao.put(entry);
                                 if ((logEntry.idempotent & QueenCode._IndexHighMask) == getIdentity()) {
                                     log.info("log entry received in leader: " + getIdentity());
-                                    wList.add(new XF001_TransactionCompleted(logEntry.getPayload().getPrimaryKey()));
+                                    wList.add(new XF001_TransactionCompleted(entry.getPrimaryKey()));
                                 }
+                                _SlotOldMajorityAppendCountMap.remove(slotIndex);
+                                _SlotNewMajorityAppendCountMap.remove(slotIndex);
                             }
                             else log.severe("commit log entry failed!");
-                            _SlotOldMajorityAppendCountMap.remove(slotIndex);
-                            _SlotNewMajorityAppendCountMap.remove(slotIndex);
                             return wList;
                         }
 
                     }
-                    LogEntry<E> logEntry = _Dao.getEntryBySlotIndex(slotIndex);
-                    wList.add(new X1A_CommitEntry(getNewMsgUid(), getIdentity(), termId, slotIndex, logEntry.idempotent));
-
+                    else {
+                        LogEntry<E> logEntry = _Dao.getEntryBySlotIndex(slotIndex);
+                        wList.add(new X15_CommitEntry(getNewMsgUid(), getIdentity(), termId, slotIndex, logEntry.idempotent));
+                    }
                 }
                 else {
                     if (slotIndex > getLastCommittedSlotIndex()) {
@@ -1086,14 +1101,15 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                             nodeEntity.setAppendSlotIndex(slotIndex);
                             int previous = _SlotOldMajorityAppendCountMap.get(slotIndex) == null ? 0
                                                                                                  : _SlotOldMajorityAppendCountMap.get(slotIndex);
-                            if (previous + 1 < _Majority.get()) _SlotOldMajorityAppendCountMap.put(slotIndex, previous + 1);
-                            else {
+
+                            _SlotOldMajorityAppendCountMap.put(slotIndex, previous + 1);
+                            if (previous + 1 >= _Majority.get()) {
                                 if (_Dao.commitEntry(slotIndex)) {
                                     LogEntry<E> logEntry = _Dao.getEntryBySlotIndex(slotIndex);
-                                    Pair<Long, Long> update = _Dao.getLastCommitted(getIdentity());
-                                    mLastCommittedSlotIndex = update.first();
-                                    mLastCommittedTermId = update.second();
+                                    setCommittedSlotIndex(termId, slotIndex);
                                     log.info("committed slot index: " + slotIndex);
+                                    E entry = logEntry.getPayload();
+                                    _BizDao.put(entry);
                                     broadcastCommit(this,
                                                     wList,
                                                     getIdentity(),
@@ -1102,17 +1118,19 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                                                     logEntry.idempotent);
                                     if ((logEntry.idempotent & QueenCode._IndexHighMask) == getIdentity()) {
                                         log.info("log entry received in leader: " + getIdentity());
-                                        wList.add(new XF001_TransactionCompleted(logEntry.getPayload().getPrimaryKey()));
+                                        wList.add(new XF001_TransactionCompleted(entry.getPrimaryKey()));
                                     }
+                                    _SlotOldMajorityAppendCountMap.remove(slotIndex);
                                 }
                                 else log.severe("commit log entry failed!");
-                                _SlotOldMajorityAppendCountMap.remove(slotIndex);
                                 return wList;
                             }
                         }
                     }
-                    LogEntry<E> logEntry = _Dao.getEntryBySlotIndex(slotIndex);
-                    wList.add(new X1A_CommitEntry(getNewMsgUid(), getIdentity(), termId, slotIndex, logEntry.idempotent));
+                    else {
+                        LogEntry<E> logEntry = _Dao.getEntryBySlotIndex(slotIndex);
+                        wList.add(new X15_CommitEntry(getNewMsgUid(), getIdentity(), termId, slotIndex, logEntry.idempotent));
+                    }
                 }
             }
             else {
@@ -1121,8 +1139,8 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
             }
         }
         else {
-            LogEntry<E> rsyncEntry = _Dao.getEntryBySlotIndex(nextSlot);
-            if (rsyncEntry == null) log.severe("leader: "
+            LogEntry<E> rSyncEntry = _Dao.getEntryBySlotIndex(nextSlot);
+            if (rSyncEntry == null) log.severe("leader: "
                                                + getIdentity()
                                                + "\tfollower: "
                                                + followerId
@@ -1133,10 +1151,10 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
             else {
                 X12_AppendEntity x12 = new X12_AppendEntity(getNewMsgUid(),
                                                             getIdentity(),
-                                                            rsyncEntry.getTermId(),
-                                                            rsyncEntry.getSlotIndex(),
+                                                            rSyncEntry.getTermId(),
+                                                            rSyncEntry.getSlotIndex(),
                                                             getLastCommittedSlotIndex());
-                x12.setEntry(rsyncEntry);
+                x12.setEntry(rSyncEntry);
                 wList.add(x12);
             }
 
@@ -1151,14 +1169,15 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                                           long currentTermId,
                                           long slotIndex,
                                           long idempotent) {
-        broadcast.sendAll(wList, new X1A_CommitEntry(getNewMsgUid(), leaderId, currentTermId, slotIndex, idempotent));
+        broadcast.sendAll(wList, new X15_CommitEntry(getNewMsgUid(), leaderId, currentTermId, slotIndex, idempotent));
         return wList;
     }
 
     @Override
     public void revertFollower() {
-        changeStage(RaftStage.LEADER, RaftStage.FOLLOWER);
-        mBallotId = _Dao.updateMetaBallot(0);
+        if (changeStage(RaftStage.LEADER, RaftStage.FOLLOWER)) mBallotId = _Dao.updateMetaBallot(0);
+        _SlotNewMajorityAppendCountMap.clear();
+        _SlotOldMajorityAppendCountMap.clear();
     }
 
     @Override
@@ -1167,14 +1186,14 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                                 long leaderId,
                                 long termId,
                                 long lastCommittedSlotIndex) {
-        X18_LeadLease x18 = new X18_LeadLease(getNewMsgUid(), leaderId, termId, lastCommittedSlotIndex);
-        broadcast.sendAll(wList, x18);
+        X19_LeadLease x19 = new X19_LeadLease(getNewMsgUid(), leaderId, termId, lastCommittedSlotIndex);
+        broadcast.sendAll(wList, x19);
         setStatus(RaftStatus.LEADER_LEASE);
         return wList;
     }
 
     private void leaderLease() {
-        localEvent(new XF002_ClusterLocal(X18_LeadLease.COMMAND));
+        localEvent(new XF002_ClusterLocal(X19_LeadLease.COMMAND));
         nextLease();
     }
 
@@ -1187,45 +1206,40 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                 return LEADER_LEASE_TIMER;
             }
         };
-        vLeaderLeaseTimeout = TaskService.getInstance().requestTimerService(timer, getBindSerial());
+        vLeaderLeaseTimeout = _TaskService.requestTimerService(timer, getBindSerial());
     }
 
     @Override
     public List<ICommand> jointConsensus(IBroadcast<WsContext> broadcast,
                                          List<ICommand> wList,
-                                         long localNodeId,
+                                         long leaderId,
                                          long currentTermId,
                                          long slotIndex,
                                          long lastCommittedSlotIndex,
                                          long[] oldConfig,
                                          long[] newConfig) {
-
-        LogEntry<E> logEntry = new LogEntry<>();
-        logEntry.termId = currentTermId;
-        logEntry.slotIndex = slotIndex;
+        if (checkConfigConsistent()) return wList;
+        LogEntry<E> logEntry = new LogEntry<>(currentTermId, slotIndex, getNewMsgUid());
         _Dao.jointConsensus(logEntry, oldConfig, newConfig);
         mIsJointConsensus = true;
-        X15_JointConsensus x15 = new X15_JointConsensus(getNewMsgUid(), localNodeId, currentTermId, slotIndex, lastCommittedSlotIndex);
-        x15.setOldConfig(oldConfig);
-        x15.setNewConfig(newConfig);
-        broadcast.sendAll(wList, x15);
-        return wList;
+        setSlotIndex(currentTermId, slotIndex);
+        return broadcastEntry(broadcast, wList, leaderId, 0, lastCommittedSlotIndex, logEntry);
     }
 
     @Override
     public List<ICommand> configConsensus(IBroadcast<WsContext> broadcast,
                                           List<ICommand> wList,
-                                          long nodeId,
-                                          long termId,
+                                          long leaderId,
+                                          long currentTermId,
                                           long slotIndex,
+                                          long lastCommittedSlotIndex,
                                           long[] newConfig) {
-        _Dao.appendEntry(new LogEntry<>(termId, slotIndex, getNewMsgUid()));
-        setSlotIndex(termId, slotIndex);
+
         mIsJointConsensus = false;
-        X17_CommittedConfig x17 = new X17_CommittedConfig(getNewMsgUid(), nodeId, termId, slotIndex);
-        x17.setNewConfig(newConfig);
-        wList.add(x17);
-        return wList;
+        LogEntry<E> logEntry = new LogEntry<>(currentTermId, slotIndex, getNewMsgUid());
+        _Dao.jointConsensus(logEntry, null, newConfig);
+        setSlotIndex(currentTermId, slotIndex);
+        return broadcastEntry(broadcast, wList, leaderId, 0, lastCommittedSlotIndex, logEntry);
     }
 
     /*-----------------------------------------------------ICandidate---------------------------------------------------*/
@@ -1246,64 +1260,40 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                                       long slotIndex,
                                       long lastCommittedTermId,
                                       long lastCommittedSlotIndex) {
-        boolean accept = candidateId == getBallotId()
-                         || termId > getCurrentTermId()
-                         || lastCommittedSlotIndex > getLastCommittedSlotIndex()
-                         || slotIndex > getSlotIndex();
+        boolean accept = termId > getCurrentTermId() || lastCommittedSlotIndex > getLastCommittedSlotIndex() || slotIndex > getSlotIndex();
         if (accept) revertFollower(candidateId);
-        return new X11_Ballot(getNewMsgUid(), candidateId, termId, slotIndex, getBallotId(), accept);
-    }
-
-    @Override
-    public void randomWaitNext() {
-        ElectTimer timer = new ElectTimer(RaftStage.CANDIDATE,
-                                          this,
-                                          ElectTimer.NODE_ELECT_RANDOM_WAIT_MIN
-                                                + (_Random.nextInt() & Integer.MAX_VALUE)
-                                                  % (ElectTimer.NODE_ELECT_RANDOM_WAIT_MAX - ElectTimer.NODE_ELECT_RANDOM_WAIT_MIN))
-        {
-            @Override
-            public int getSerialNum() {
-                return NEXT_ELECT_RANDOM_WAIT_TIMER;
-            }
-        };
-
-        vNextElectionRandomWaitTimeout = TaskService.getInstance().requestTimerService(timer, getBindSerial());
+        return new X11_Ballot(getNewMsgUid(), getIdentity(), termId, slotIndex, getBallotId(), accept);
     }
 
     @Override
     public void onReceiveBallot(long nodeId, long termId, long slotIndex, long ballotId, boolean accept) {
-        if (!checkCurrentStage(RaftStage.CANDIDATE) || ballotId != getIdentity()) return;
-        if (termId > getCurrentTermId()) {
-            changeStage(RaftStage.CANDIDATE, RaftStage.FOLLOWER);
-            return;
-        }
-        if (mIsJointConsensus) {
-            if (_ElectionBallotSet.remove(nodeId) && accept) vBallotCount++;
-            if (_NewElectionBallotSet.remove(nodeId) && accept) vNewBallotCount++;
-            if (vBallotCount >= _Majority.get()
-                && vNewBallotCount >= _NewMajority.get()) changeStage(RaftStage.CANDIDATE, RaftStage.LEADER);
-            else if (_OldNodesStateMap.size() - vBallotCount >= _Majority.get()
-                     || _NewNodesStateMap.size() - vNewBallotCount >= _NewMajority.get()) randomWaitNext();
-        }
-        else {
-            if (_ElectionBallotSet.remove(nodeId)) {
-                if (accept) vBallotCount++;
+        if (checkCurrentStage(RaftStage.CANDIDATE) && ballotId == getIdentity() && getCurrentTermId() == termId) {
+            if (mIsJointConsensus) {
+                if (_ElectionBallotSet.remove(nodeId) && accept) vBallotCount++;
+                if (_NewElectionBallotSet.remove(nodeId) && accept) vNewBallotCount++;
+                if (vBallotCount >= _Majority.get()
+                    && vNewBallotCount >= _NewMajority.get()) changeStage(RaftStage.CANDIDATE, RaftStage.LEADER);
+                else if (_OldNodesStateMap.size() - vBallotCount >= _Majority.get()
+                         || _NewNodesStateMap.size() - vNewBallotCount >= _NewMajority.get()) revertFollower(0);
+            }
+            else {
+
+                if (_ElectionBallotSet.remove(nodeId) && accept) vBallotCount++;
                 if (vBallotCount >= _Majority.get()) changeStage(RaftStage.CANDIDATE, RaftStage.LEADER);
-                else if (_OldNodesStateMap.size() - vBallotCount >= _Majority.get()) randomWaitNext();
+                else if (_OldNodesStateMap.size() - vBallotCount >= _Majority.get()) revertFollower(0);
             }
         }
-    }
+        else log.warning("ballot receive error: "
+                         + "\r\n\tfrom: "
+                         + nodeId
+                         + "\r\n\tterm: "
+                         + termId
+                         + "\r\n\tslot: "
+                         + slotIndex
+                         + "\r\n\tballot: "
+                         + ballotId
+                         + toString());
 
-    @Override
-    public boolean stageLock(RaftStage stage) {
-        switch (stage) {
-            case CANDIDATE:
-            case FOLLOWER:
-            case LEADER:
-            default:
-                return false;
-        }
     }
 
     @Override
@@ -1315,35 +1305,37 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                                    long lastCommittedTermId,
                                    long lastCommittedSlotIndex) {
         if (checkCurrentStage(RaftStage.CANDIDATE)) {
-            X10_StartElection x10 = new X10_StartElection(getNewMsgUid(),
-                                                          candidateId,
-                                                          termId,
-                                                          slotIndex,
-                                                          lastCommittedTermId,
-                                                          lastCommittedSlotIndex,
-                                                          mIsJointConsensus ? getNewConfig() : getOldConfig());
-            x10.setCluster(true);
-
+            mBallotId = getIdentity();
+            long[] config = mIsJointConsensus ? getNewConfig() : getOldConfig();
             Map<Long, NodeEntity> nodeStateMap = mIsJointConsensus ? _NewNodesStateMap : _OldNodesStateMap;
-            _NewMajority.set(_NewNodesStateMap.size() / 2 + 1);
-            _Majority.set(_OldNodesStateMap.size() / 2 + 1);
-            if (nodeStateMap.isEmpty()) changeStage(RaftStage.CANDIDATE, RaftStage.LEADER);
-            else broadcast.sendCollection(wList, x10, nodeStateMap.keySet());
+            _NewMajority.set(((_NewNodesStateMap.size() + 1) >> 1) + 1);
+            _Majority.set(((_OldNodesStateMap.size() + 1) >> 1) + 1);
+            if (nodeStateMap.isEmpty() && changeStage(RaftStage.CANDIDATE, RaftStage.LEADER)) mIsSingleMode = true;
+            else {
+                wList = wList == null ? new LinkedList<>() : wList;
+                broadcast.sendCollection(wList,
+                                         new X10_StartElection(getNewMsgUid(),
+                                                               candidateId,
+                                                               termId,
+                                                               slotIndex,
+                                                               lastCommittedTermId,
+                                                               lastCommittedSlotIndex,
+                                                               config),
+                                         nodeStateMap.keySet());
+            }
         }
         return wList;
     }
 
     @Override
     public void revertFollower(long leaderId) {
-        changeStage(RaftStage.CANDIDATE, RaftStage.FOLLOWER);
-        _Dao.updateMetaBallot(leaderId);
-        mBallotId = leaderId;
+        if (changeStage(RaftStage.CANDIDATE, RaftStage.FOLLOWER)) mBallotId = _Dao.updateMetaBallot(leaderId);
     }
 
     /*--------------------------------------------------------IFollower-------------------------------------------------*/
     @Override
     public void randomWait() {
-        ElectTimer timer = new ElectTimer(RaftStage.CANDIDATE,
+        ElectTimer timer = new ElectTimer(RaftStage.FOLLOWER,
                                           this,
                                           ElectTimer.NODE_ELECT_RANDOM_WAIT_MIN
                                                 + (_Random.nextInt() & Integer.MAX_VALUE)
@@ -1354,7 +1346,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                 return RANDOM_WAIT_TIMER;
             }
         };
-        vRandomWaitTimeout = TaskService.getInstance().requestTimerService(timer, getBindSerial());
+        vRandomWaitTimeout = _TaskService.requestTimerService(timer, getBindSerial());
     }
 
     @Override
@@ -1366,7 +1358,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                 return LEASE_TIMER;
             }
         };
-        vLeaseTimeout = TaskService.getInstance().requestTimerService(timer, getBindSerial());
+        vLeaseTimeout = _TaskService.requestTimerService(timer, getBindSerial());
     }
 
     @Override
@@ -1384,13 +1376,31 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
         mSlotIndex = slotIndex;
         mNextSlot = mSlotIndex + 1;
         mTermId = termId;
+        _Dao.updateMetaSlotIndex(termId, slotIndex);
+    }
+
+    @Override
+    public void setCommittedSlotIndex(long lastCommittedTermId, long lastCommittedSlotIndex) {
+        if (mLastCommittedTermId <= lastCommittedTermId && mLastCommittedSlotIndex <= lastCommittedSlotIndex) {
+            _Dao.updateMetaLastCommittedSlotIndex(lastCommittedTermId, lastCommittedSlotIndex);
+            mLastCommittedSlotIndex = lastCommittedSlotIndex;
+            mLastCommittedTermId = lastCommittedTermId;
+        }
+    }
+
+    @Override
+    public ICommand onReceiveLease(long leaderId, long leaderTermId, long leaderSlotIndex) {
+        revertFollower(leaderId);
+        return new X1A_LeaseAck(getNewMsgUid(), getIdentity(), getCurrentTermId(), getSlotIndex());
     }
 
     @Override
     public ICommand onReceiveEntity(long leaderId, long lastCommittedSlotIndex, LogEntry<E> entry) {
-        revertFollower(leaderId);
         long leaderSlotIndex = entry.getSlotIndex();
         long leaderTermId = entry.getTermId();
+        revertFollower(leaderId);
+        _Dao.appendEntry(entry);
+        mIsJointConsensus = entry.isJoinConsensus();
         if (!checkConsistent(leaderTermId, leaderSlotIndex)) {
             X13_EntryAck x13 = new X13_EntryAck(getNewMsgUid(),
                                                 getIdentity(),
@@ -1401,10 +1411,12 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
             x13.nextIndex = getLastCommittedSlotIndex() + 1;
             return x13;
         }
-
         if (getLastCommittedSlotIndex() < lastCommittedSlotIndex) {
             for (long slotIndex = getLastCommittedSlotIndex(); slotIndex <= lastCommittedSlotIndex; slotIndex++)
-                if (_Dao.commitEntry(slotIndex)) mLastCommittedSlotIndex = slotIndex;
+                if (_Dao.commitEntry(slotIndex)) {
+                    LogEntry<E> cLogEntry = _Dao.getEntryBySlotIndex(slotIndex);
+                    setCommittedSlotIndex(cLogEntry.termId, cLogEntry.slotIndex);
+                }
                 else {
                     X13_EntryAck x13 = new X13_EntryAck(getNewMsgUid(),
                                                         getIdentity(),
@@ -1416,75 +1428,28 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                     return x13;
                 }
         }
-        _Dao.appendEntry(entry);
         setSlotIndex(leaderTermId, leaderSlotIndex);
         return new X13_EntryAck(getNewMsgUid(), getIdentity(), getCurrentTermId(), getSlotIndex(), true, true);
     }
 
     @Override
-    public ICommand onReceivedJointConsensus(long identity,
-                                             long leaderTermId,
-                                             long leaderSlotIndex,
-                                             long lastCommittedSlotIndex,
-                                             long[] oldNodeConfig,
-                                             long[] newNodeConfig) {
-
-        if (!checkConsistent(leaderTermId, leaderSlotIndex)) {
-            X16_ConfigAck x16 = new X16_ConfigAck(getNewMsgUid(),
-                                                  getIdentity(),
-                                                  getCurrentTermId(),
-                                                  getSlotIndex(),
-                                                  false,
-                                                  isQualify(leaderSlotIndex));
-            x16.nextIndex = getLastCommittedSlotIndex() + 1;
-            return x16;
-        }
-
-        if (getLastCommittedSlotIndex() < lastCommittedSlotIndex) {
-            for (long slotIndex = getLastCommittedSlotIndex(); slotIndex <= lastCommittedSlotIndex; slotIndex++)
-                if (_Dao.commitEntry(slotIndex)) mLastCommittedSlotIndex = slotIndex;
-                else {
-                    X16_ConfigAck x16 = new X16_ConfigAck(getNewMsgUid(),
-                                                          getIdentity(),
-                                                          getLastCommittedTermId(),
-                                                          getLastCommittedSlotIndex(),
-                                                          true,
-                                                          false);
-                    x16.nextIndex = slotIndex;
-                    return x16;
-                }
-        }
-        LogEntry<E> entry = new LogEntry<>();
-        entry.termId = leaderTermId;
-        entry.slotIndex = leaderSlotIndex;
-        _Dao.jointConsensus(entry, oldNodeConfig, newNodeConfig);
-        setSlotIndex(leaderTermId, leaderSlotIndex);
-        mIsJointConsensus = true;
-        return new X16_ConfigAck(getNewMsgUid(), getIdentity(), getCurrentTermId(), getSlotIndex(), true, true);
-    }
-
-    @Override
     public ICommand onReceiveCommit(long leaderId, long termId, long slotIndex, long idempotent) {
         if (_Dao.commitEntry(slotIndex)) {
-            if (mLastCommittedSlotIndex < slotIndex) {
-                mLastCommittedSlotIndex = slotIndex;
-                mLastCommittedTermId = termId;
-            }
-            LogEntry<E> logEntry = _Dao.clearClientEntryByIdempotent(idempotent);
+            setCommittedSlotIndex(termId, slotIndex);
+            LogEntry<E> logEntry = _Dao.getEntryBySlotIndex(slotIndex);
+            E entry = logEntry.getPayload();
+            _BizDao.put(entry);
+            logEntry = _Dao.clearClientEntryByIdempotent(idempotent);
             if (logEntry != null) {
                 for (long clientSlot = logEntry.getSlotIndex();; clientSlot--)
                     if (_Dao.clearClientEntryBySlot(clientSlot) == null) break;
                 log.info("client log entry: " + logEntry.toString());
-                return new XF001_TransactionCompleted(logEntry.getPayload().getPrimaryKey());
+                return new XF001_TransactionCompleted(entry.getPrimaryKey());
             }
             else log.info("client log entry invalid. " + "committed term: " + termId + "\tslot: " + slotIndex);
         }
+        else log.severe("commit failed! termId: " + termId + "\tslot: " + slotIndex);
         return XF000_NULL.INSTANCE;
-    }
-
-    @Override
-    public ICommand onReceiveLease(long leaderId, long leaderTermId, long leaderSlotIndex) {
-        return new X19_LeaseAck(getNewMsgUid(), getIdentity(), getCurrentTermId(), getSlotIndex());
     }
 
     /*--------------------------------------------------------Timer-----------------------------------------------------*/
@@ -1532,27 +1497,26 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                 break;
             case ElectTimer.NODE_DISCOVER_TIMER:
                 timer = (ElectTimer) result;
-                if (timer.getDoTime() >= vNodeDiscoverTimeout) {
-                    log.info("discover node time out!");
-                    if (timer.checkStage(getCurrentStage()) && _NewNodesStateMap.isEmpty()) {
-                        log.info("discover node -> first node start -> only one node ");
-                        changeStage(RaftStage.DISCOVER, RaftStage.CANDIDATE);
-                    }
-                    else if (checkCurrentStage(RaftStage.LEADER)) {
-                        onDiscoverTimeout();
-                    }
-                    else log.info("discover node -> my stage: " + getCurrentStage() + " :nodes= " + _NewNodesStateMap.size());
+                if (timer.getDoTime() < vNodeDiscoverTimeout) break;
+                switch (getCurrentStage()) {
+                    case LEADER:
+                        jointConsistent();
+                        break;
+                    default:
+                        changeStage(RaftStage.DISCOVER, _NewNodesStateMap.isEmpty() ? RaftStage.CANDIDATE : RaftStage.FOLLOWER);
+                        break;
                 }
                 break;
             case ElectTimer.NODE_DISMISS_TIMER:
                 timer = (ElectTimer) result;
                 if (timer.getDoTime() >= vNodeDismissTimeout) {
-                    if (checkCurrentStage(RaftStage.LEADER)) commitNewConfig();
-                    else if (checkCurrentStage(RaftStage.FOLLOWER) && _NewNodesStateMap.isEmpty()) {
-                        /*
-                         * 如果当前 follower 是比较慢速的情况，将会出现 slotIndex 远落后于 leader 的情况 此时成为 leader 后需要 client 的重发已被确认返回的 slotIndex 的内容。
-                         */
-                        changeStage(RaftStage.FOLLOWER, RaftStage.LEADER);
+                    switch (getCurrentStage()) {
+                        case LEADER:
+                            commitNewConfig();
+                            break;
+                        default:
+                            changeStage(RaftStage.FOLLOWER, RaftStage.CANDIDATE);
+                            break;
                     }
                 }
                 break;
@@ -1560,6 +1524,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                 return false;
         }
         return true;
+
     }
 
     @Override

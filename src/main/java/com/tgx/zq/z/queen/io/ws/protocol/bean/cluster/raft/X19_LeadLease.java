@@ -26,23 +26,23 @@ package com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft;
 
 import com.tgx.zq.z.queen.base.inf.ISerialTick;
 
-public class X18_LeadLease
+public class X19_LeadLease
         extends
         X1X_ClusterExchange
 {
-    public final static int COMMAND = 0x18;
+    public final static int COMMAND = 0x19;
 
-    public X18_LeadLease(long mMsgUID, long nodeId, long termId, long slotIndex) {
+    public X19_LeadLease(long mMsgUID, long nodeId, long termId, long slotIndex) {
         super(COMMAND, mMsgUID, nodeId, termId, slotIndex);
     }
 
-    public X18_LeadLease() {
+    public X19_LeadLease() {
         super(COMMAND);
     }
 
     @Override
-    public X18_LeadLease duplicate() {
-        X18_LeadLease x18 = new X18_LeadLease(getUID(), nodeId, termId, slotIndex);
+    public X19_LeadLease duplicate() {
+        X19_LeadLease x18 = new X19_LeadLease(getUID(), nodeId, termId, slotIndex);
         x18.setCluster(isCluster());
         return x18;
     }

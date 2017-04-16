@@ -43,9 +43,7 @@ public interface IElector<E extends IDbStorageProtocol>
 
     void changeStatus(RaftStatus previous, RaftStatus next);
 
-    boolean stageLock(RaftStage stage);
-
-    void changeStage(RaftStage previous, RaftStage next);
+    boolean changeStage(RaftStage previous, RaftStage next);
 
     boolean checkCurrentStage(RaftStage stage);
 
@@ -54,13 +52,6 @@ public interface IElector<E extends IDbStorageProtocol>
     void waitDismissNode();
 
     void onClusterConnected(long identity);
-
-    ICommand onReceivedJointConsensus(long identity,
-                                      long termId,
-                                      long slotIndex,
-                                      long lastCommittedSlotIndex,
-                                      long[] oldNodeConfig,
-                                      long[] newNodeConfig);
 
     long[] getOldConfig();
 

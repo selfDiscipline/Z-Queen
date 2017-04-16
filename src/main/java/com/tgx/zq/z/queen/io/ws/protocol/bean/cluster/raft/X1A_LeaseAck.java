@@ -26,43 +26,35 @@ package com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft;
 
 import com.tgx.zq.z.queen.base.util.IoUtil;
 
-public class X16_ConfigAck
+public class X1A_LeaseAck
         extends
         X1X_ClusterExchange
 {
-    public final static int COMMAND = 0x16;
-    public boolean          accept, qualify;
-    public long             nextIndex;
+    public final static int COMMAND = 0x1A;
+    public boolean          accept;
 
-    public X16_ConfigAck(long mMsgUID, long nodeId, long termId, long slotIndex, boolean accept, boolean qualify) {
+    public X1A_LeaseAck(long mMsgUID, long nodeId, long termId, long slotIndex) {
         super(COMMAND, mMsgUID, nodeId, termId, slotIndex);
-        this.accept = accept;
-        this.qualify = qualify;
     }
 
-    public X16_ConfigAck() {
+    public X1A_LeaseAck() {
         super(COMMAND);
     }
 
     @Override
     public int dataLength() {
-        return super.dataLength() + 9;
-    }
-
-    @Override
-    public int encodec(byte[] data, int pos) {
-        pos += IoUtil.writeByte((accept ? 1 : 0) | (qualify ? 2 : 0), data, pos);
-        pos += IoUtil.writeLong(nextIndex, data, pos);
-        return super.encodec(data, pos);
+        return super.dataLength() + 1;
     }
 
     @Override
     public int decodec(byte[] data, int pos) {
-        byte attr = data[pos++];
-        accept = (attr & 0x01) != 0;
-        qualify = (attr & 0x02) != 0;
-        nextIndex = IoUtil.readLong(data, pos);
-        pos += 8;
+        accept = data[pos++] > 0;
         return super.decodec(data, pos);
+    }
+
+    @Override
+    public int encodec(byte[] data, int pos) {
+        pos += IoUtil.writeByte(accept ? 1 : 0, data, pos);
+        return super.encodec(data, pos);
     }
 }

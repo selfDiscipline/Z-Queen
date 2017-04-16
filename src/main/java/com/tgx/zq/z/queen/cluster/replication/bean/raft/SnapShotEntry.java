@@ -122,9 +122,7 @@ public class SnapShotEntry<E extends IDbStorageProtocol>
 
         @Override
         public void objectToEntry(SnapShotEntry<E> object, DatabaseEntry entry) {
-            byte[] data = object.encode();
-            object.dispose();
-            entry.setData(data);
+            entry.setData(object.encode());
         }
 
     }

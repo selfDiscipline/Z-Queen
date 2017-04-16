@@ -46,8 +46,6 @@ public interface ICandidate<E extends IDbStorageProtocol>
                             long lastCommittedTermId,
                             long lastCommittedSlotIndex);
 
-    void randomWaitNext();
-
     long getIdentity();
 
     long getCurrentTermId();

@@ -23,11 +23,6 @@
  */
 package com.tgx.zq.z.queen.io.disruptor.handler;
 
-import java.nio.channels.AsynchronousSocketChannel;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
 import com.lmax.disruptor.RingBuffer;
 import com.tgx.zq.z.queen.base.constant.QueenCode;
 import com.tgx.zq.z.queen.base.disruptor.QEvent;
@@ -48,26 +43,15 @@ import com.tgx.zq.z.queen.io.bean.cluster.XF001_TransactionCompleted;
 import com.tgx.zq.z.queen.io.disruptor.operations.CLOSE_OPERATOR;
 import com.tgx.zq.z.queen.io.disruptor.operations.ws.WRITE_OPERATOR;
 import com.tgx.zq.z.queen.io.impl.AioSessionManager;
-import com.tgx.zq.z.queen.io.inf.ICommand;
-import com.tgx.zq.z.queen.io.inf.IConnectActive;
-import com.tgx.zq.z.queen.io.inf.IConnectMode;
-import com.tgx.zq.z.queen.io.inf.ISession;
-import com.tgx.zq.z.queen.io.inf.ISessionDismiss;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X10_StartElection;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X11_Ballot;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X12_AppendEntity;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X13_EntryAck;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X14_RSyncEntry;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X15_JointConsensus;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X16_ConfigAck;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X17_CommittedConfig;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X18_LeadLease;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X19_LeaseAck;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1A_CommitEntry;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1B_CommittedAck;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1C_ClientEntry;
+import com.tgx.zq.z.queen.io.inf.*;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.*;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X101_Close;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X104_ExchangeIdentity;
+
+import java.nio.channels.AsynchronousSocketChannel;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public abstract class ClusterHandler<E extends IDbStorageProtocol, D extends IBizDao<E>, N extends BizNode<E, D>>
         implements
@@ -132,15 +116,14 @@ public abstract class ClusterHandler<E extends IDbStorageProtocol, D extends IBi
                     inCmd = rContent.first();
                     session = rContent.second();
                     List<ICommand> wList = new LinkedList<>();
-                    ICommand outCmd = null;
                     switch (inCmd.getSerialNum()) {
                         case X10_StartElection.COMMAND:
                             X10_StartElection x10 = (X10_StartElection) inCmd;
-                            outCmd = _ClusterNode.onReceiveElection(x10.nodeId,
-                                                                    x10.termId,
-                                                                    x10.slotIndex,
-                                                                    x10.lastCommittedTermId,
-                                                                    x10.lastCommittedSlotIndex);
+                            wList.add(_ClusterNode.onReceiveElection(x10.nodeId,
+                                                                     x10.termId,
+                                                                     x10.slotIndex,
+                                                                     x10.lastCommittedTermId,
+                                                                     x10.lastCommittedSlotIndex));
                             break;
                         case X11_Ballot.COMMAND:
                             X11_Ballot x11 = (X11_Ballot) inCmd;
@@ -154,34 +137,35 @@ public abstract class ClusterHandler<E extends IDbStorageProtocol, D extends IBi
                             break;
                         case X13_EntryAck.COMMAND:
                             X13_EntryAck x13 = (X13_EntryAck) inCmd;
-                            if (x13.leaderAck) wList.add(_ClusterNode.onReceiveEntryAck(x13.nodeId,
-                                                                                        x13.termId,
-                                                                                        x13.slotIndex,
-                                                                                        x13.lastCommittedSlotIndex,
-                                                                                        x13.clientSlotIndex));
-                            else _ClusterNode.onReceiveEntryAck(wList,
-                                                                x13.nodeId,
-                                                                x13.termId,
-                                                                x13.slotIndex,
-                                                                x13.nextIndex,
-                                                                x13.accept,
-                                                                x13.qualify);
+                            _ClusterNode.onReceiveEntryAck(wList,
+                                                           x13.nodeId,
+                                                           x13.termId,
+                                                           x13.slotIndex,
+                                                           x13.nextIndex,
+                                                           x13.accept,
+                                                           x13.qualify);
                             break;
-                        case X18_LeadLease.COMMAND:
-                            X18_LeadLease x18 = (X18_LeadLease) inCmd;
-                            outCmd = _ClusterNode.onReceiveLease(x18.nodeId, x18.termId, x18.slotIndex);
+                        case X15_CommitEntry.COMMAND:
+                            X15_CommitEntry x1A = (X15_CommitEntry) inCmd;
+                            wList.add(_ClusterNode.onReceiveCommit(x1A.nodeId, x1A.termId, x1A.slotIndex, x1A.idempotent));
                             break;
-                        case X19_LeaseAck.COMMAND:
-                            break;
-                        case X1A_CommitEntry.COMMAND:
-                            X1A_CommitEntry x1A = (X1A_CommitEntry) inCmd;
-                            outCmd = _ClusterNode.onReceiveCommit(x1A.nodeId, x1A.termId, x1A.slotIndex, x1A.idempotent);
-                            break;
-                        case X1C_ClientEntry.COMMAND:
-                            X1C_ClientEntry x1C = (X1C_ClientEntry) inCmd;
+                        case X17_ClientEntry.COMMAND:
+                            X17_ClientEntry x1C = (X17_ClientEntry) inCmd;
                             LogEntry<E> clientLogEntry = new LogEntry<>();
                             clientLogEntry.decode(x1C.getPayload());
                             _ClusterNode.onReceiveClientEntity(wList, x1C.nodeId, clientLogEntry);
+                            break;
+                        case X18_ClientEntryAck.COMMAND:
+                            X18_ClientEntryAck x18 = (X18_ClientEntryAck) inCmd;
+                            wList.add(_ClusterNode.onReceiveEntryAck(x18.nodeId,
+                                                                     x18.termId,
+                                                                     x18.slotIndex,
+                                                                     x18.lastCommittedSlotIndex,
+                                                                     x18.clientSlotIndex));
+                            break;
+                        case X19_LeadLease.COMMAND:
+                            X19_LeadLease x19 = (X19_LeadLease) inCmd;
+                            wList.add(_ClusterNode.onReceiveLease(x19.nodeId, x19.termId, x19.slotIndex));
                             break;
                         case X101_Close.COMMAND:
                             dismiss = session.getDismissCallback();
@@ -207,32 +191,39 @@ public abstract class ClusterHandler<E extends IDbStorageProtocol, D extends IBi
                                                                                               rResult.third());
                             break;
                     }
-                    if (outCmd != null) publish(_WriteRB, Type.DISPATCH, outCmd, session, WRITE_OPERATOR.PLAIN_SYMMETRY);
                     for (ICommand outCommand : wList)
                         switch (outCommand.getSerialNum()) {
                             case XF000_NULL.COMMAND:
-                                break;// ignore
+                                break;// drop
                             case XF001_TransactionCompleted.COMMAND:
                                 publish(_ConsistentResultRB, Type.BRANCH, outCommand, null, null);
+                                break;
                             default:
-                                publish(_WriteRB, Type.DISPATCH, outCommand, outCommand.getSession(), WRITE_OPERATOR.PLAIN_SYMMETRY);
+                                ISession oSession = outCommand.getSession();
+                                publish(_WriteRB,
+                                        Type.DISPATCH,
+                                        outCommand,
+                                        oSession == null ? session : oSession,
+                                        WRITE_OPERATOR.PLAIN_SYMMETRY);
+                                break;
                         }
                     break;
                 case BRANCH:
                     Pair<ICommand, ISession> bContent = event.getContent();
+                    IEventOp<ICommand, ISession> bOperator = event.getEventOp();
                     inCmd = bContent.first();
                     session = bContent.second();
-                    Collection<ICommand> rCollection = consistentWrite(inCmd,
-                                                                       _ClusterNode,
-                                                                       session,
-                                                                       ClusterNode.getUniqueIdentity(sequence));
+                    Collection<ICommand> rCollection = consistentWrite(inCmd, _ClusterNode, session, inCmd.getTransactionKey());
                     if (rCollection != null) for (ICommand out : rCollection)
-                        publish(_WriteRB, Type.DISPATCH, out, out.getSession(), WRITE_OPERATOR.PLAIN_SYMMETRY);
-                    else tryPublish(_ConsistentResultRB,
-                                    Type.BRANCH,
-                                    new XF001_TransactionCompleted(inCmd.getTransactionKey()),
-                                    null,
-                                    null);
+                        switch (out.getSerialNum()) {
+                            case XF001_TransactionCompleted.COMMAND:
+                                tryPublish(_ConsistentResultRB, Type.BRANCH, out, null, bOperator);
+                                break;
+                            default:
+                                ISession oSession = out.getSession();
+                                publish(_WriteRB, Type.DISPATCH, out, oSession == null ? session : oSession, WRITE_OPERATOR.PLAIN_SYMMETRY);
+                                break;
+                        }
                     break;
                 default:
                     break;
@@ -283,14 +274,12 @@ public abstract class ClusterHandler<E extends IDbStorageProtocol, D extends IBi
             case X12_AppendEntity.COMMAND:
             case X13_EntryAck.COMMAND:
             case X14_RSyncEntry.COMMAND:
-            case X15_JointConsensus.COMMAND:
-            case X17_CommittedConfig.COMMAND:
-            case X16_ConfigAck.COMMAND:
-            case X18_LeadLease.COMMAND:
-            case X19_LeaseAck.COMMAND:
-            case X1A_CommitEntry.COMMAND:
-            case X1B_CommittedAck.COMMAND:
-            case X1C_ClientEntry.COMMAND:
+            case X15_CommitEntry.COMMAND:
+            case X16_CommittedAck.COMMAND:
+            case X17_ClientEntry.COMMAND:
+            case X18_ClientEntryAck.COMMAND:
+            case X19_LeadLease.COMMAND:
+            case X1A_LeaseAck.COMMAND:
             case X101_Close.COMMAND:
             case X104_ExchangeIdentity.COMMAND:
                 return RESULT.HANDLE;

@@ -34,8 +34,8 @@ public class XF001_TransactionCompleted
     public final static int COMMAND = 0xF001;
     private final long      _TransactionKey;
 
-    public XF001_TransactionCompleted(final long transactionKey) {
-        _TransactionKey = transactionKey;
+    public XF001_TransactionCompleted(final long entryPrimaryKey) {
+        _TransactionKey = entryPrimaryKey;
     }
 
     @Override

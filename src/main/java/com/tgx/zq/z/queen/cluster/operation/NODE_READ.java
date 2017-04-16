@@ -36,22 +36,7 @@ import com.tgx.zq.z.queen.io.ws.filter.WsControlFilter;
 import com.tgx.zq.z.queen.io.ws.filter.WsFrameFilter;
 import com.tgx.zq.z.queen.io.ws.filter.ZCommandFilter;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X10_StartElection;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X11_Ballot;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X12_AppendEntity;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X13_EntryAck;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X14_RSyncEntry;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X15_JointConsensus;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X16_ConfigAck;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X17_CommittedConfig;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X18_LeadLease;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X19_LeaseAck;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1A_CommitEntry;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1B_CommittedAck;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1C_ClientEntry;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1D_CreateSnapshot;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1E_SnapshotAck;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1F_SnapshotInstall;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.*;
 
 public enum NODE_READ
         implements
@@ -76,22 +61,18 @@ public enum NODE_READ
                     return new X13_EntryAck();
                 case X14_RSyncEntry.COMMAND:
                     return new X14_RSyncEntry();
-                case X15_JointConsensus.COMMAND:
-                    return new X15_JointConsensus();
-                case X16_ConfigAck.COMMAND:
-                    return new X16_ConfigAck();
-                case X17_CommittedConfig.COMMAND:
-                    return new X17_CommittedConfig();
-                case X18_LeadLease.COMMAND:
-                    return new X18_LeadLease();
-                case X19_LeaseAck.COMMAND:
-                    return new X19_LeaseAck();
-                case X1A_CommitEntry.COMMAND:
-                    return new X1A_CommitEntry();
-                case X1B_CommittedAck.COMMAND:
-                    return new X1B_CommittedAck();
-                case X1C_ClientEntry.COMMAND:
-                    return new X1C_ClientEntry();
+                case X15_CommitEntry.COMMAND:
+                    return new X15_CommitEntry();
+                case X16_CommittedAck.COMMAND:
+                    return new X16_CommittedAck();
+                case X17_ClientEntry.COMMAND:
+                    return new X17_ClientEntry();
+                case X18_ClientEntryAck.COMMAND:
+                    return new X18_ClientEntryAck();
+                case X19_LeadLease.COMMAND:
+                    return new X19_LeadLease();
+                case X1A_LeaseAck.COMMAND:
+                    return new X1A_LeaseAck();
                 case X1D_CreateSnapshot.COMMAND:
                     return new X1D_CreateSnapshot();
                 case X1E_SnapshotAck.COMMAND:

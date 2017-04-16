@@ -27,19 +27,19 @@ package com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft;
 import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.cluster.replication.bean.raft.LogEntry;
 
-public class X1C_ClientEntry
+public class X17_ClientEntry
         extends
         X1X_ClusterExchange
 {
-    public final static int COMMAND = 0x1C;
+    public final static int COMMAND = 0x17;
     private int             mPayloadLength;
     private byte[]          mPayload;
 
-    public X1C_ClientEntry(long mMsgUID, long nodeId, long termId, long slotIndex) {
+    public X17_ClientEntry(long mMsgUID, long nodeId, long termId, long slotIndex) {
         super(COMMAND, mMsgUID, nodeId, termId, slotIndex);
     }
 
-    public X1C_ClientEntry() {
+    public X17_ClientEntry() {
         super(COMMAND);
     }
 

@@ -58,6 +58,8 @@ public interface ILogEntry<E extends IDbStorageProtocol>
 
     void commitNewConfig(long[] newConfig);
 
+    boolean isJoinConsensus();
+
     @Override
     default long getPrimaryKey() {
         return getSlotIndex();

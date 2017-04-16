@@ -26,19 +26,19 @@ package com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft;
 
 import com.tgx.zq.z.queen.base.util.IoUtil;
 
-public class X1A_CommitEntry
+public class X15_CommitEntry
         extends
         X1X_ClusterExchange
 {
-    public final static int COMMAND = 0x1A;
+    public final static int COMMAND = 0x15;
     public long             idempotent;
 
-    public X1A_CommitEntry(long _uid, long leaderId, long termId, long slotIndex, long idempotent) {
+    public X15_CommitEntry(long _uid, long leaderId, long termId, long slotIndex, long idempotent) {
         super(COMMAND, _uid, leaderId, termId, slotIndex);
         this.idempotent = idempotent;
     }
 
-    public X1A_CommitEntry() {
+    public X15_CommitEntry() {
         super(COMMAND);
 
     }

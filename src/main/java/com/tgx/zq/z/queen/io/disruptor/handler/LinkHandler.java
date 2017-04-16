@@ -115,29 +115,19 @@ public abstract class LinkHandler<E extends IDbStorageProtocol, D extends IBizDa
                     cmd = rContent.first();
                     session = rContent.second();
                     IEventOp<ICommand, ISession> rOperator = event.getEventOp();
-                    Triple<RESULT, ICommand, Throwable> lResult = consistentRead(cmd, _BizNode.getBizDao());
+                    Triple<RESULT, ICommand, Throwable> lResult = localRead(cmd, _BizNode.getBizDao());
                     convergentClearTransaction();
                     switch (lResult.first()) {
                         case HANDLE:
                             Triple<ICommand, ISession, IEventOp<ICommand, ISession>> rResult = rOperator.handle(cmd, session);
                             publish(_WriteRB, Type.DISPATCH, rResult.first(), rResult.second(), rResult.third());
                             break;
-                        case PASS:
-                            ICommand cCmd = lResult.second();
-                            long transactionKey = ClusterNode.getUniqueIdentity(sequence);
-                            cCmd.setTransactionKey(transactionKey);
-                            _BizNode.mapSession(transactionKey, session);
-                            _TransactionSkipListMap.put(transactionKey,
-                                                        new ConsistentTransaction<>(transactionKey,
-                                                                                    TimeUtil.CURRENT_TIME_SECOND_CACHE + 3,
-                                                                                    session));
-                            tryPublish(_ConsistentWriteRB, Type.BRANCH, cCmd, session, rOperator);
-                            break;
                         case SECTION:
                             rResult = rOperator.handle(cmd, session);
                             publish(_WriteRB, Type.DISPATCH, rResult.first(), rResult.second(), rResult.third());
-                            cCmd = lResult.second();
-                            transactionKey = ClusterNode.getUniqueIdentity(sequence);
+                        case PASS:
+                            ICommand cCmd = lResult.second();
+                            long transactionKey = ClusterNode.getUniqueIdentity();
                             cCmd.setTransactionKey(transactionKey);
                             _BizNode.mapSession(transactionKey, session);
                             _TransactionSkipListMap.put(transactionKey,
@@ -162,6 +152,8 @@ public abstract class LinkHandler<E extends IDbStorageProtocol, D extends IBizDa
                                     long modeType = clusterId & QueenCode.XID_MK;
                                     _BizNode.mapSession(identity, session, clusterId, modeType);
                                     break;
+                                case XF000_NULL.COMMAND:
+                                    break;// drop
                                 default:
                                     Triple<ICommand, ISession, IEventOp<ICommand, ISession>> mqResult = _BizNode.getMqServer()
                                                                                                                 .consistentHandle(cmd,
@@ -181,9 +173,11 @@ public abstract class LinkHandler<E extends IDbStorageProtocol, D extends IBizDa
                     break;
                 case BRANCH:
                     Pair<ICommand, ISession> bContent = event.getContent();
+                    IEventOp<ICommand, ISession> bOperator = event.getEventOp();
                     cmd = bContent.first();
-                    Triple<ICommand, ISession, IEventOp<ICommand, ISession>> bResult = consistentRead(cmd.getTransactionKey(), _BizNode);
-                    publish(_WriteRB, Type.DISPATCH, bResult.first(), bResult.second(), bResult.third());
+                    Pair<ICommand, ISession> bResult = consistentRead(cmd.getTransactionKey(), _BizNode);
+                    Triple<ICommand, ISession, IEventOp<ICommand, ISession>> rResult = bOperator.handle(bResult.first(), bResult.second());
+                    publish(_WriteRB, Type.DISPATCH, rResult.first(), rResult.second(), rResult.third());
                     clearTransaction(cmd.getTransactionKey());
                     break;
                 default:
@@ -259,8 +253,7 @@ public abstract class LinkHandler<E extends IDbStorageProtocol, D extends IBizDa
             }
         }
         else if (mode.equals(OPERATION_MODE.ACCEPT_SERVER) || mode.equals(OPERATION_MODE.ACCEPT_SERVER_SSL)) {
-            if (cmd.getSerialNum() == X101_Close.COMMAND)
-                return RESULT.HANDLE;
+            if (cmd.getSerialNum() == X101_Close.COMMAND) return RESULT.HANDLE;
         }
         else if (_BizNode.getMqServer().trial(cmd, mode).equals(RESULT.HANDLE)) return RESULT.HANDLE;
         return RESULT.IGNORE;

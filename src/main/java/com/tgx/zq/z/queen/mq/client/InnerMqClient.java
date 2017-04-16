@@ -30,6 +30,7 @@ import java.util.MissingResourceException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sleepycat.je.DatabaseException;
 import com.tgx.zq.z.queen.base.util.Configuration;
 import com.tgx.zq.z.queen.base.util.IPParser;
 import com.tgx.zq.z.queen.base.util.IoUtil;
@@ -247,6 +248,10 @@ class InnerMqClient
 
     public void start() {
         _MqClient.start();
+    }
+
+    public void close() {
+        if (_MqEnv != null) _MqEnv.close();
     }
 
     public void publish(ICommand content) {

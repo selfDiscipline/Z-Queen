@@ -24,7 +24,7 @@
 
 package com.tgx.zq.z.queen.biz.inf;
 
-import com.tgx.zq.z.queen.base.disruptor.inf.IEventOp;
+import com.tgx.zq.z.queen.base.util.Pair;
 import com.tgx.zq.z.queen.base.util.Triple;
 import com.tgx.zq.z.queen.biz.template.BizNode;
 import com.tgx.zq.z.queen.db.bdb.inf.IBizDao;
@@ -38,7 +38,7 @@ public interface IConsistentRead<E extends IDbStorageProtocol, D extends IBizDao
         IDestine
 {
 
-    Triple<RESULT, ICommand, Throwable> consistentRead(final ICommand _inCommand, final D bizDao);
+    Triple<RESULT, ICommand, Throwable> localRead(final ICommand _inCommand, final D bizDao);
 
-    Triple<ICommand, ISession, IEventOp<ICommand, ISession>> consistentRead(final long transactionKey, final N bizNode);
+    Pair<ICommand, ISession> consistentRead(final long transactionKey, final N bizNode);
 }

@@ -28,11 +28,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sleepycat.bind.EntryBinding;
-import com.sleepycat.bind.tuple.IntegerBinding;
 import com.sleepycat.bind.tuple.LongBinding;
 import com.sleepycat.collections.StoredMap;
 import com.sleepycat.collections.StoredSortedMap;
-import com.sleepycat.je.*;
+import com.sleepycat.je.Database;
+import com.sleepycat.je.DatabaseConfig;
+import com.sleepycat.je.DatabaseEntry;
+import com.sleepycat.je.DatabaseException;
+import com.sleepycat.je.Environment;
+import com.sleepycat.je.SecondaryConfig;
+import com.sleepycat.je.SecondaryDatabase;
+import com.sleepycat.je.SecondaryKeyCreator;
 import com.tgx.zq.z.queen.base.util.Pair;
 import com.tgx.zq.z.queen.cluster.replication.bean.raft.LogEntry;
 import com.tgx.zq.z.queen.cluster.replication.bean.raft.MetaEntry;
@@ -169,21 +175,18 @@ public class ConsistentDao<E extends IDbStorageProtocol>
     }
 
     /**
-     * 
      * @param logEntry
      * @return next slot index
      */
     public long appendEntry(LogEntry<E> logEntry) {
-        mLogMap.put(logEntry.getSlotIndex(), logEntry);
         logEntry.append();
-        updateMetaSlotIndex(logEntry.termId, logEntry.slotIndex);
+        mLogMap.put(logEntry.getSlotIndex(), logEntry);
         return logEntry.slotIndex;
     }
 
     public long jointConsensus(LogEntry<E> logEntry, long[] oldConfig, long[] newConfig) {
-        mLogMap.put(logEntry.getPrimaryKey(), logEntry);
         logEntry.joinConsensus(oldConfig, newConfig);
-        updateMetaSlotIndex(logEntry.termId, logEntry.slotIndex);
+        mLogMap.put(logEntry.getPrimaryKey(), logEntry);
         return logEntry.slotIndex;
     }
 
@@ -191,11 +194,11 @@ public class ConsistentDao<E extends IDbStorageProtocol>
         if (slotIndex > mMetaEntry.lastCommittedSlotIndex) {
             LogEntry<E> logEntry = mLogMap.get(slotIndex);
             if (logEntry == null) {
-                log.warning("slot has no entry");
+                log.warning("slot has no entry : " + slotIndex);
                 return false;
             }
             logEntry.commit();
-            updateMetaLastCommittedSlotIndex(logEntry.termId, slotIndex);
+            mLogMap.put(slotIndex, logEntry);
         }
         return true;
     }
@@ -226,12 +229,10 @@ public class ConsistentDao<E extends IDbStorageProtocol>
             log.log(Level.WARNING, "cluster consistent dao.database close error ", e);
         }
         finally {
-            try {
-                if (_Environment != null) {
-                    _Environment.sync();
-                    _Environment.cleanLog();
-                    _Environment.close();
-                }
+            if (_Environment != null && !_Environment.isClosed()) try {
+                _Environment.sync();
+                _Environment.cleanLog();
+                _Environment.close();
             }
             catch (DatabaseException e) {
                 log.log(Level.SEVERE, "cluster consistent dao.env close error ", e);

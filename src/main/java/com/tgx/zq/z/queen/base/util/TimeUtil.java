@@ -51,9 +51,9 @@ public class TimeUtil
         return QueenCode.UID_TIME_27_MK & (second << 21) | (++SEQUENCE_21_OF_SECOND & QueenCode.UID_SEQ_21_MK);
     }
 
-    public static long concurrentGetUID16YearCollision2M() {
+    public static long getUID16Year2TypeCollision1M() {
         long second = CURRENT_TIME_SECOND_CACHE - ZERO_AFTER_UTC_DELTA;
-        return QueenCode.UID_TIME_27_MK & (second << 21) | (ATOMIC_SEQUENCE_OF_SECOND.incrementAndGet() & QueenCode.UID_SEQ_21_MK);
+        return QueenCode.UID_TIME_27_MK & (second << 21) | ((++SEQUENCE_201_OF_SECOND << 1) & QueenCode.UID_SEQ_20_1_MK);
     }
 
     public static long getUID32YearCollision1M() {
@@ -61,14 +61,14 @@ public class TimeUtil
         return QueenCode.UID_TIME_28_MK & (second << 20) | (++SEQUENCE_20_OF_SECOND & QueenCode.UID_SEQ_20_MK);
     }
 
+    public static long concurrentGetUID16YearCollision2M() {
+        long second = CURRENT_TIME_SECOND_CACHE - ZERO_AFTER_UTC_DELTA;
+        return QueenCode.UID_TIME_27_MK & (second << 21) | (ATOMIC_SEQUENCE_OF_SECOND.incrementAndGet() & QueenCode.UID_SEQ_21_MK);
+    }
+
     public static long concurrentGetUID32YearCollision1M() {
         long second = CURRENT_TIME_SECOND_CACHE - ZERO_AFTER_UTC_DELTA;
         return QueenCode.UID_TIME_28_MK & (second << 20) | (ATOMIC_SEQUENCE_OF_SECOND.incrementAndGet() & QueenCode.UID_SEQ_20_MK);
-    }
-
-    public static long getUID16Year2TypeCollision1M() {
-        long second = CURRENT_TIME_SECOND_CACHE - ZERO_AFTER_UTC_DELTA;
-        return QueenCode.UID_TIME_27_MK & (second << 21) | ((++SEQUENCE_201_OF_SECOND << 1) & QueenCode.UID_SEQ_20_1_MK);
     }
 
     public static long concurrentGetUID16Year2TypeCollision1M() {

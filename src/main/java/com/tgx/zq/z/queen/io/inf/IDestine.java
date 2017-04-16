@@ -32,8 +32,8 @@ public interface IDestine
     enum RESULT
     {
         HANDLE,
-        PASS,
         SECTION,
+        PASS,
         IGNORE,
         ERROR
     }

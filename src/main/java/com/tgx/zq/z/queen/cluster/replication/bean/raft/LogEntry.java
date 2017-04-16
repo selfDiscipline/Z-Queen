@@ -38,28 +38,32 @@ public class LogEntry<E extends IDbStorageProtocol>
         ILogEntry<E>
 {
 
-    public long                         termId;
-    public long                         slotIndex;
-    public long                         idempotent;
-    public Status                       status;
-    public IDbStorageProtocol.Operation operation;
-    private byte                        mStatus;
-    private byte                        mOperation;
-    private byte[]                      mPayload;
-    private E                           mEntity;
-    private long[]                      mOldConfig, mNewConfig;
+    public long      termId;
+    public long      slotIndex;
+    public long      idempotent;
+    public Status    status;
+    public Operation operation;
+    private byte     mStatus;
+    private byte     mOperation;
+    private byte[]   mPayload;
+    private E        mEntity;
+    private long[]   mOldConfig, mNewConfig;
 
     public LogEntry(long termId, long slotIndex, long idempotent) {
         this.slotIndex = slotIndex;
         this.termId = termId;
         this.idempotent = idempotent;
         status = Status.OP_CLIENT;
-        operation = IDbStorageProtocol.Operation.OP_INSERT;
+        operation = Operation.OP_INSERT;
+    }
+
+    public LogEntry(long termId, long slotIndex) {
+        this(termId, slotIndex, 0);
     }
 
     public LogEntry() {
         status = Status.OP_NULL;
-        operation = IDbStorageProtocol.Operation.OP_NULL;
+        operation = Operation.OP_NULL;
     }
 
     @Override
@@ -194,9 +198,14 @@ public class LogEntry<E extends IDbStorageProtocol>
     }
 
     @Override
+    public boolean isJoinConsensus() {
+        return mNewConfig != null || mOldConfig != null;
+    }
+
+    @Override
     public void commitNewConfig(long[] newConfig) {
-        mNewConfig = newConfig;
         status = Status.OP_COMMITTED_NEW_CONFIG;
+        mNewConfig = newConfig;
     }
 
     @Override
@@ -221,8 +230,8 @@ public class LogEntry<E extends IDbStorageProtocol>
     }
 
     @Override
-    public void setPayload(E payload) {
-        mEntity = payload;
+    public void setPayload(E entity) {
+        mEntity = entity;
         mPayload = mEntity.encode();
     }
 
@@ -235,22 +244,22 @@ public class LogEntry<E extends IDbStorageProtocol>
     }
 
     @Override
-    public IDbStorageProtocol.Operation getOperation() {
+    public Operation getOperation() {
         switch (mOperation) {
             case IDbStorageProtocol._OP_INVALID:
-                return operation = IDbStorageProtocol.Operation.OP_INVALID;
+                return operation = Operation.OP_INVALID;
             case IDbStorageProtocol._OP_INSERT:
-                return operation = IDbStorageProtocol.Operation.OP_INSERT;
+                return operation = Operation.OP_INSERT;
             case IDbStorageProtocol._OP_MODIFY:
-                return operation = IDbStorageProtocol.Operation.OP_MODIFY;
+                return operation = Operation.OP_MODIFY;
             case IDbStorageProtocol._OP_REMOVE:
-                return operation = IDbStorageProtocol.Operation.OP_REMOVE;
+                return operation = Operation.OP_REMOVE;
             case IDbStorageProtocol._OP_APPEND:
-                return operation = IDbStorageProtocol.Operation.OP_APPEND;
+                return operation = Operation.OP_APPEND;
             case IDbStorageProtocol._OP_DELETE:
-                return operation = IDbStorageProtocol.Operation.OP_DELETE;
+                return operation = Operation.OP_DELETE;
             default:
-                return operation = IDbStorageProtocol.Operation.OP_NULL;
+                return operation = Operation.OP_NULL;
         }
     }
 
@@ -293,9 +302,7 @@ public class LogEntry<E extends IDbStorageProtocol>
 
         @Override
         public void objectToEntry(LogEntry<T> object, DatabaseEntry entry) {
-            byte[] data = object.encode();
-            object.dispose();
-            entry.setData(data);
+            entry.setData(object.encode());
         }
 
     }
