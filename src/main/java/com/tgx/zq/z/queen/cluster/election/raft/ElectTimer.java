@@ -35,29 +35,28 @@ public class ElectTimer
         extends
         Task
 {
-    private final static int  SerialNum                    = 0x856F7B3F;
-    public final static int   NET_TRANSPORT_TIMER          = SerialNum + 1;
-    public final static int   NEXT_ELECT_RANDOM_WAIT_TIMER = NET_TRANSPORT_TIMER + 1;
-    public final static int   LEASE_TIMER                  = NEXT_ELECT_RANDOM_WAIT_TIMER + 1;
-    public final static int   LEADER_LEASE_TIMER           = LEASE_TIMER + 1;
-    public final static int   RANDOM_WAIT_TIMER            = LEADER_LEASE_TIMER + 1;
-    public final static int   NODE_DISCOVER_TIMER          = RANDOM_WAIT_TIMER + 1;
-    public final static int   NODE_DISMISS_TIMER           = NODE_DISCOVER_TIMER + 1;
+    private final static int  SerialNum                   = 0x856F7B3F;
+    public final static int   NET_TRANSPORT_TIMER         = SerialNum + 1;
+    public final static int   LEASE_TIMER                 = NET_TRANSPORT_TIMER + 1;
+    public final static int   LEADER_LEASE_TIMER          = LEASE_TIMER + 1;
+    public final static int   RANDOM_WAIT_TIMER           = LEADER_LEASE_TIMER + 1;
+    public final static int   NODE_DISCOVER_TIMER         = RANDOM_WAIT_TIMER + 1;
+    public final static int   NODE_DISMISS_TIMER          = NODE_DISCOVER_TIMER + 1;
 
-    public static long        NODE_EXCHANGE_TIMEOUT        = 75;
-    public static long        NODE_ELECT_RANDOM_WAIT_MIN   = NODE_EXCHANGE_TIMEOUT << 1;
-    public static long        NODE_ELECT_RANDOM_WAIT_MAX   = NODE_ELECT_RANDOM_WAIT_MIN << 1;
-    public static long        NODE_LEASE_TIMEOUT           = 5000;
-    public static long        NODE_LEADER_LEASE_SAP        = NODE_LEASE_TIMEOUT >> 1;
-    public static long        NODE_CONNECT_RETRY_WAIT_MAX  = NODE_LEASE_TIMEOUT >> 1;
-    public static long        NODE_CONNECT_RETRY_WAIT_MIN  = NODE_CONNECT_RETRY_WAIT_MAX >> 1;
-    public static long        NODE_CONNECT_SAP             = NODE_EXCHANGE_TIMEOUT << 1;
-    public static long        NODE_DISCOVER_TIMEOUT        = NODE_LEASE_TIMEOUT;
-    public static long        NODE_DISMISS_TIMEOUT         = NODE_DISCOVER_TIMEOUT;
+    public static long        NODE_EXCHANGE_TIMEOUT       = 75;
+    public static long        NODE_ELECT_RANDOM_WAIT_MIN  = NODE_EXCHANGE_TIMEOUT << 1;
+    public static long        NODE_ELECT_RANDOM_WAIT_MAX  = NODE_ELECT_RANDOM_WAIT_MIN << 1;
+    public static long        NODE_LEASE_TIMEOUT          = 5000;
+    public static long        NODE_LEADER_LEASE_SAP       = NODE_LEASE_TIMEOUT >> 1;
+    public static long        NODE_CONNECT_RETRY_WAIT_MAX = NODE_LEASE_TIMEOUT >> 1;
+    public static long        NODE_CONNECT_RETRY_WAIT_MIN = NODE_CONNECT_RETRY_WAIT_MAX >> 1;
+    public static long        NODE_CONNECT_SAP            = NODE_EXCHANGE_TIMEOUT << 1;
+    public static long        NODE_DISCOVER_TIMEOUT       = NODE_LEASE_TIMEOUT;
+    public static long        NODE_DISMISS_TIMEOUT        = NODE_DISCOVER_TIMEOUT;
 
     private final RaftStage   _Stage;
     private final IElector<?> _Elector;
-    Logger                    log                          = Logger.getLogger(getClass().getSimpleName());
+    Logger                    log                         = Logger.getLogger(getClass().getSimpleName());
 
     private ElectTimer(RaftStage stage, IElector<?> elector, long delay, TimeUnit timeUnit) {
         super(0);

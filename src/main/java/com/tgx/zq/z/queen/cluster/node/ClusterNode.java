@@ -115,8 +115,8 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
         IElector<E>
 {
 
-    private final static String              ConfigFileName                 = "ClusterConfig";
-    private final static String              sSocketOptionAttrFileName      = "SocketOption";
+    private final static String              CONFIG_FILE_NAME               = "ClusterConfig";
+    private final static String              SOCKET_OPTION_ATTR_FILE_NAME   = "SocketOption";
     private static final int                 _HEARTBEAT_TIMER_SERIAL_NUM    = TimerTask.SuperSerialNum + 399;
     private static long                      _XID;
     private static String                    _NODE_LOCAL_HOST;
@@ -143,7 +143,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     private InetSocketAddress                mLocalAddress;
     private AsynchronousServerSocketChannel  mServerChannel;
     private BN                               mBizNode;
-    private final ISessionCreator            _Creator                       = new AioCreator(sSocketOptionAttrFileName)
+    private final ISessionCreator            _Creator                       = new AioCreator(SOCKET_OPTION_ATTR_FILE_NAME)
                                                                             {
                                                                                 @Override
                                                                                 public IContext createContext(ISessionOption option,
@@ -179,7 +179,6 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     private volatile long                    vLeaderLeaseTimeout;
     private volatile long                    vRandomWaitTimeout;
     private volatile long                    vNodeDiscoverTimeout;
-    private volatile long                    vNextElectionRandomWaitTimeout;
     private volatile long                    vNodeDismissTimeout;
     private volatile int                     vBallotCount, vNewBallotCount;
 
@@ -201,7 +200,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     public static long getConfig_XID() {
         try {
             if (_XID == 0) {
-                _XID = Configuration.readConfigHexInteger("XID", ConfigFileName);
+                _XID = Configuration.readConfigHexInteger("XID", CONFIG_FILE_NAME);
                 return _XID <<= 48;
             }
             return _XID;
@@ -215,7 +214,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
 
     private static String getConfig_LocalHostAddress() {
         try {
-            return _NODE_LOCAL_HOST == null ? _NODE_LOCAL_HOST = Configuration.readConfigString("NODE_LOCAL_HOST", ConfigFileName)
+            return _NODE_LOCAL_HOST == null ? _NODE_LOCAL_HOST = Configuration.readConfigString("NODE_LOCAL_HOST", CONFIG_FILE_NAME)
                                             : _NODE_LOCAL_HOST;
         }
         catch (MissingResourceException |
@@ -227,7 +226,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
 
     private static int getConfig_ClusterPort() {
         try {
-            return _CLUSTER_PORT == 0 ? _CLUSTER_PORT = Configuration.readConfigInteger("CLUSTER_PORT", ConfigFileName) : _CLUSTER_PORT;
+            return _CLUSTER_PORT == 0 ? _CLUSTER_PORT = Configuration.readConfigInteger("CLUSTER_PORT", CONFIG_FILE_NAME) : _CLUSTER_PORT;
 
         }
         catch (MissingResourceException |
@@ -240,7 +239,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     private static String[] getConfig_PreviousNodesAddress() {
         try {
             if (_NODE_PREVIOUS_LIST == null) {
-                String noSplit = Configuration.readConfigString("NODE_PREVIOUS_LIST", ConfigFileName);
+                String noSplit = Configuration.readConfigString("NODE_PREVIOUS_LIST", CONFIG_FILE_NAME);
                 return _NODE_PREVIOUS_LIST = !noSplit.equals("") ? noSplit.split(",") : null;
             }
             return _NODE_PREVIOUS_LIST;
@@ -253,7 +252,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
 
     private static long getConfig_ExchangeTimeout() {
         try {
-            return Configuration.readConfigInteger("NODE_EXCHANGE_TIMEOUT", ConfigFileName);
+            return Configuration.readConfigInteger("NODE_EXCHANGE_TIMEOUT", CONFIG_FILE_NAME);
         }
         catch (MissingResourceException |
                ClassCastException e) {
@@ -264,7 +263,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
 
     private static long getConfig_LeaseTimeout() {
         try {
-            return Configuration.readConfigInteger("NODE_LEASE_TIMEOUT", ConfigFileName);
+            return Configuration.readConfigInteger("NODE_LEASE_TIMEOUT", CONFIG_FILE_NAME);
         }
         catch (MissingResourceException |
                ClassCastException e) {
@@ -275,7 +274,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
 
     public static int getConfig_AIO_ProducerSize() {
         try {
-            return _AIO_PRODUCER_SIZE == 0 ? _AIO_PRODUCER_SIZE = Configuration.readConfigInteger("AIO_PRODUCER_SIZE", ConfigFileName)
+            return _AIO_PRODUCER_SIZE == 0 ? _AIO_PRODUCER_SIZE = Configuration.readConfigInteger("AIO_PRODUCER_SIZE", CONFIG_FILE_NAME)
                                            : _AIO_PRODUCER_SIZE;
 
         }
@@ -286,10 +285,10 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
         }
     }
 
-    public static int getConfig_PortChannelCapacity() {
+    private static int getConfig_PortChannelCapacity() {
         try {
             return _PORTCHANNEL_CAPACITY == 0 ? _PORTCHANNEL_CAPACITY = Configuration.readConfigInteger("PORTCHANNEL_CAPACITY",
-                                                                                                        ConfigFileName)
+                                                                                                        CONFIG_FILE_NAME)
                                               : _PORTCHANNEL_CAPACITY;
 
         }
@@ -300,7 +299,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
         }
     }
 
-    public final static long getNextMsgUid() {
+    public static long getNextMsgUid() {
         return getConfig_XID() | TimeUtil.getUID16YearCollision2M();
     }
     /*--------------------------------------------------------IElector--------------------------------------------------*/
@@ -526,11 +525,10 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
 
     @Override
     public void sendDirect(List<ICommand> wList, Command<WsContext> cmd, long nodeId) {
-        long _port = nodeId;
-        log.info("++++@" + Long.toHexString(_port).toUpperCase());
+        log.info("++++@" + Long.toHexString(nodeId).toUpperCase());
         Command<WsContext> duplicateCmd = cmd.duplicate();
-        duplicateCmd.setPortIdx(_port);
-        ISession cSession = findSessionByPort(_port);
+        duplicateCmd.setPortIdx(nodeId);
+        ISession cSession = findSessionByPort(nodeId);
         if (cSession != null && wList != null) {
             log.finer("send " + cmd + " -> " + cSession);
             duplicateCmd.setSession(cSession).setCluster(true);
@@ -542,13 +540,13 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     public void sendExcept(List<ICommand> wList, Command<WsContext> cmd, long nodeId) {
         long[][] c = portIndex(QueenCode.XID_MK & getIdentity());
         if (c != null && c.length > 1 && c[1] != null && c[1].length > 0) {
-            for (long _port : c[1]) {
+            for (long port : c[1]) {
 
-                if (_port != 0 && _port != nodeId) {
-                    log.info("++++@" + Long.toHexString(_port).toUpperCase());
+                if (port != 0 && port != nodeId) {
+                    log.info("++++@" + Long.toHexString(port).toUpperCase());
                     Command<WsContext> duplicateCmd = cmd.duplicate();
-                    duplicateCmd.setPortIdx(_port);
-                    ISession cSession = findSessionByPort(_port);
+                    duplicateCmd.setPortIdx(port);
+                    ISession cSession = findSessionByPort(port);
                     if (cSession != null && wList != null) {
                         log.finer("send " + cmd + " -> " + cSession);
                         duplicateCmd.setSession(cSession).setCluster(true);
@@ -685,13 +683,12 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
         return newConfig;
     }
 
-    public boolean checkConfigConsistent() {
-        boolean consistent = true;
+    private boolean checkConfigConsistent() {
         Map<Long, NodeEntity> superSet = _OldNodesStateMap.size() > _NewNodesStateMap.size() ? _OldNodesStateMap : _NewNodesStateMap;
         Map<Long, NodeEntity> subSet = _OldNodesStateMap.size() > _NewNodesStateMap.size() ? _NewNodesStateMap : _OldNodesStateMap;
         for (long nodeId : superSet.keySet())
             if (!subSet.containsKey(nodeId)) return false;
-        return consistent;
+        return true;
     }
 
     private void jointConsistent() {
@@ -786,7 +783,8 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
             /* new config session */
             if (nodeEntity == null) nodeEntity = _NewNodesStateMap.get(nodeId);
             /*
-             * nodeEntity in old config ,its session count isn't negative. nodeEntity in new config ,after its session count equals zero
+             * nodeEntity in old config ,its session count isn't negative.
+             * nodeEntity in new config ,after its session count equals zero
              * that remove it
              */
             if (nodeEntity == null) log.severe("session is not in config old either new !");
@@ -1463,16 +1461,6 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                 }
                 else if (timer.checkStage(RaftStage.LEADER)) {
                     // TODO set this follow
-                }
-                break;
-            case ElectTimer.NEXT_ELECT_RANDOM_WAIT_TIMER:
-                timer = (ElectTimer) result;
-                if (timer.getDoTime() < vNextElectionRandomWaitTimeout || !timer.checkStage(getCurrentStage())) {
-                    log.info("candidate random wait ignore! current stage: " + getCurrentStage());
-                }
-                else {
-                    log.info("candidate random wait time out -> next proposal");
-                    proposal();
                 }
                 break;
             case ElectTimer.LEASE_TIMER:
