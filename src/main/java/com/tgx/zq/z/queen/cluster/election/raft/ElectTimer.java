@@ -39,13 +39,14 @@ public class ElectTimer
         extends
         Task
 {
+    final static int          SerialNum                   = 0x856F7B3F;
+    public final static int   NET_TRANSPORT_TIMER         = SerialNum + 1;
     public final static int   LEASE_TIMER                 = NET_TRANSPORT_TIMER + 1;
     public final static int   LEADER_LEASE_TIMER          = LEASE_TIMER + 1;
     public final static int   RANDOM_WAIT_TIMER           = LEADER_LEASE_TIMER + 1;
     public final static int   NODE_DISCOVER_TIMER         = RANDOM_WAIT_TIMER + 1;
     public final static int   NODE_DISMISS_TIMER          = NODE_DISCOVER_TIMER + 1;
-    private final static int  SerialNum                   = 0x856F7B3F;
-    public final static int   NET_TRANSPORT_TIMER         = SerialNum + 1;
+
     public static long        NODE_EXCHANGE_TIMEOUT       = 75;
     public static long        NODE_ELECT_RANDOM_WAIT_MIN  = NODE_EXCHANGE_TIMEOUT << 1;
     public static long        NODE_ELECT_RANDOM_WAIT_MAX  = NODE_ELECT_RANDOM_WAIT_MIN << 1;
