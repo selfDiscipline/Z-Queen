@@ -24,7 +24,6 @@
  */
 package com.tgx.zq.z.queen.io.ws.protocol;
 
-import com.tgx.zq.z.queen.base.inf.ISerialTick;
 import com.tgx.zq.z.queen.io.inf.ICommand;
 import com.tgx.zq.z.queen.io.inf.IRouteLv4;
 import com.tgx.zq.z.queen.io.inf.ISession;

@@ -25,8 +25,6 @@
 
 package com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft;
 
-import com.tgx.zq.z.queen.base.inf.ISerialTick;
-
 /**
  * @author William.d.zk
  */

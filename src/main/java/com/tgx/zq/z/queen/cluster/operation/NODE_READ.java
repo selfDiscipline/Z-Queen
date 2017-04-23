@@ -37,7 +37,20 @@ import com.tgx.zq.z.queen.io.ws.filter.WsControlFilter;
 import com.tgx.zq.z.queen.io.ws.filter.WsFrameFilter;
 import com.tgx.zq.z.queen.io.ws.filter.ZCommandFilter;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
-import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.*;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X10_StartElection;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X11_Ballot;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X12_AppendEntity;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X13_EntryAck;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X14_RSyncEntry;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X15_CommitEntry;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X16_CommittedAck;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X17_ClientEntry;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X18_ClientEntryAck;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X19_LeadLease;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1A_LeaseAck;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1D_CreateSnapshot;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1E_SnapshotAck;
+import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1F_SnapshotInstall;
 
 /**
  * @author William.d.zk

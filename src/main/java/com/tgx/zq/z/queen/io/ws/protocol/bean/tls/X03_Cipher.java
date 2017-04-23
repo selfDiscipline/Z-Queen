@@ -24,7 +24,6 @@
  */
 package com.tgx.zq.z.queen.io.ws.protocol.bean.tls;
 
-import com.tgx.zq.z.queen.base.inf.ISerialTick;
 import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.io.ws.protocol.Command;
 import com.tgx.zq.z.queen.io.ws.protocol.ZContext;

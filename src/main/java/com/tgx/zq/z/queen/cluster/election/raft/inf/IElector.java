@@ -29,7 +29,6 @@ import com.tgx.zq.z.queen.cluster.election.raft.RaftStage;
 import com.tgx.zq.z.queen.cluster.election.raft.RaftStatus;
 import com.tgx.zq.z.queen.cluster.inf.IBroadcast;
 import com.tgx.zq.z.queen.db.bdb.inf.IDbStorageProtocol;
-import com.tgx.zq.z.queen.io.inf.ICommand;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
 
 public interface IElector<E extends IDbStorageProtocol>
