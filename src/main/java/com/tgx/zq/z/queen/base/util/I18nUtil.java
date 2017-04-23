@@ -24,6 +24,9 @@
  */
 package com.tgx.zq.z.queen.base.util;
 
+/**
+ * @author William.d.zk
+ */
 public class I18nUtil
 {
     public final static int CHARSET_ASCII       = 0x00;

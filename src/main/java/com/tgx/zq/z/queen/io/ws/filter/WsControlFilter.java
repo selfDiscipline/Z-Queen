@@ -39,6 +39,9 @@ import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X102_Ping;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X103_Pong;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X104_ExchangeIdentity;
 
+/**
+ * @author William.d.zk
+ */
 public class WsControlFilter
         extends
         AioFilterChain<WsContext>

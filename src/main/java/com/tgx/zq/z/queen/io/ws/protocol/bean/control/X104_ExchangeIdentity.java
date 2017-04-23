@@ -28,6 +28,9 @@ import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.io.ws.protocol.WsControl;
 import com.tgx.zq.z.queen.io.ws.protocol.WsFrame;
 
+/**
+ * @author William.d.zk
+ */
 public class X104_ExchangeIdentity
         extends
         WsControl

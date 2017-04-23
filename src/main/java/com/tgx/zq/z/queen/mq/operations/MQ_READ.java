@@ -39,6 +39,9 @@ import com.tgx.zq.z.queen.io.ws.filter.ZCommandFilter;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.mq.X80_MqTopicReg;
 
+/**
+ * @author William.d.zk
+ */
 public enum MQ_READ
         implements
         IEventOp<IPoS, ISession>,

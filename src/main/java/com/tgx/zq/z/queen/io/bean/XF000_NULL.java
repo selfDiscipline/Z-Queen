@@ -24,6 +24,9 @@
  */
 package com.tgx.zq.z.queen.io.bean;
 
+/**
+ * @author William.d.zk
+ */
 public class XF000_NULL
         extends
         XFFFF_InnerCommand

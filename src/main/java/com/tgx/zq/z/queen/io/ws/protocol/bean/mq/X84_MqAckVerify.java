@@ -31,15 +31,18 @@ import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.io.ws.protocol.Command;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
 
+/**
+ * @author William.d.zk
+ */
 public class X84_MqAckVerify
         extends
         Command<WsContext>
 {
     public final static int COMMAND = 0x84;
     public long             deviceIdx;
-    public int              succeed;                                          // ack是否成功,0:成功,1:失败
-    public long[]           ackMsgUIDs;                              // 确认的msgUIDs
-    public long[]           gapMsgUIDs;                              // 空缺的msgUIDs
+    public int              succeed;                                                    // ack是否成功,0:成功,1:失败
+    public long[]           ackMsgUIDs;                                     // 确认的msgUIDs
+    public long[]           gapMsgUIDs;                                     // 空缺的msgUIDs
     private int             mAckMsgUIDsLength;
     private int             mGapMsgUIDsLength;
 

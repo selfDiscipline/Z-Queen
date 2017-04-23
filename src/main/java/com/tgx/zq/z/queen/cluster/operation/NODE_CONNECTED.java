@@ -47,6 +47,9 @@ import com.tgx.zq.z.queen.io.inf.ISession;
 import com.tgx.zq.z.queen.io.inf.ISessionCreator;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X104_ExchangeIdentity;
 
+/**
+ * @author William.d.zk
+ */
 public enum NODE_CONNECTED
         implements
         IEventOp<Pair<IConnected, OPERATION_MODE>, AsynchronousSocketChannel>

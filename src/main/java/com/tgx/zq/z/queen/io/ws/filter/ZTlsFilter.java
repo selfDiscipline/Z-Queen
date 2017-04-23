@@ -30,6 +30,9 @@ import com.tgx.zq.z.queen.io.inf.IProtocol;
 import com.tgx.zq.z.queen.io.inf.ITlsContext;
 import com.tgx.zq.z.queen.io.ws.protocol.ZContext;
 
+/**
+ * @author William.d.zk
+ */
 public class ZTlsFilter
         extends
         AioFilterChain<ZContext>

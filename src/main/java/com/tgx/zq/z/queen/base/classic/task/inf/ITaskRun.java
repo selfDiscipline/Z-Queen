@@ -24,6 +24,9 @@
  */
 package com.tgx.zq.z.queen.base.classic.task.inf;
 
+/**
+ * @author William.d.zk
+ */
 public interface ITaskRun
 {
     void initTask();

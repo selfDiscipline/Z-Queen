@@ -30,6 +30,9 @@ import java.nio.ByteBuffer;
 import com.tgx.zq.z.queen.io.inf.IContext;
 import com.tgx.zq.z.queen.io.inf.ISessionOption;
 
+/**
+ * @author William.d.zk
+ */
 public class AioContext
         implements
         IContext

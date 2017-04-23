@@ -32,6 +32,9 @@ import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.cluster.replication.inf.ILogEntry;
 import com.tgx.zq.z.queen.db.bdb.inf.IDbStorageProtocol;
 
+/**
+ * @author William.d.zk
+ */
 public class LogEntry<E extends IDbStorageProtocol>
         implements
         IDisposable,

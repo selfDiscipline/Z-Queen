@@ -25,6 +25,9 @@
 
 package com.tgx.zq.z.queen.mq.client.db.bean;
 
+/**
+ * @author William.d.zk
+ */
 public class MqSyncEntry
 {
 }

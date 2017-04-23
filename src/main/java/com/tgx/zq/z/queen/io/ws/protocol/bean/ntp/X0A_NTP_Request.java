@@ -29,6 +29,9 @@ import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.io.ws.protocol.Command;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
 
+/**
+ * @author William.d.zk
+ */
 public class X0A_NTP_Request
         extends
         Command<WsContext>

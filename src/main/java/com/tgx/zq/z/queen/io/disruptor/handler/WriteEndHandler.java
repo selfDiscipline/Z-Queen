@@ -35,6 +35,9 @@ import com.tgx.zq.z.queen.base.disruptor.inf.IPipeEventHandler;
 import com.tgx.zq.z.queen.base.util.Pair;
 import com.tgx.zq.z.queen.io.impl.AioSession;
 
+/**
+ * @author William.d.zk
+ */
 public class WriteEndHandler
         implements
         IPipeEventHandler<QEvent, QEvent>

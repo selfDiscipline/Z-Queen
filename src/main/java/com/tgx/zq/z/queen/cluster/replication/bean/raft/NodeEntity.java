@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.cluster.replication.bean.raft;
 
 import com.tgx.zq.z.queen.cluster.election.raft.RaftStage;
 
+/**
+ * @author William.d.zk
+ */
 public class NodeEntity
 {
     private final long _Identify;

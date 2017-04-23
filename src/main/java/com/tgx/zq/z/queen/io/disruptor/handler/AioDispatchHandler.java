@@ -49,6 +49,9 @@ import com.tgx.zq.z.queen.io.inf.IPoS;
 import com.tgx.zq.z.queen.io.inf.ISession;
 import com.tgx.zq.z.queen.io.inf.ISessionManager;
 
+/**
+ * @author William.d.zk
+ */
 public class AioDispatchHandler
         implements
         IPipeEventHandler<QEvent, QEvent>

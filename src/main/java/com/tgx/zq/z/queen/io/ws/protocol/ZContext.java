@@ -29,6 +29,9 @@ import com.tgx.zq.z.queen.io.inf.IConnectMode;
 import com.tgx.zq.z.queen.io.inf.IEncryptHandler;
 import com.tgx.zq.z.queen.io.inf.ISessionOption;
 
+/**
+ * @author William.d.zk
+ */
 public class ZContext
         extends
         WsContext

@@ -59,6 +59,9 @@ import com.tgx.zq.z.queen.io.disruptor.handler.ReadDispatchHandler;
 import com.tgx.zq.z.queen.io.disruptor.handler.WriteDispatchHandler;
 import com.tgx.zq.z.queen.io.disruptor.handler.WriteEndHandler;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class ExecutorCore<E extends IDbStorageProtocol, D extends IBizDao<E>, N extends BizNode<E, D>>
         extends
         ThreadPoolExecutor

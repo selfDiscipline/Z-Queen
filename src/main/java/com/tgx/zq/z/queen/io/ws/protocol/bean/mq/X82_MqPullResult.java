@@ -31,12 +31,15 @@ import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.io.ws.protocol.Command;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
 
+/**
+ * @author William.d.zk
+ */
 public class X82_MqPullResult
         extends
         Command<WsContext>
 {
     public final static int COMMAND = 0x82;
-    public byte[]           msgDetails;         // {long msgUID, int payloadLength, byte[] payload}为一组
+    public byte[]           msgDetails;             // {long msgUID, int payloadLength, byte[] payload}为一组
 
     public X82_MqPullResult() {
         super(COMMAND, false);

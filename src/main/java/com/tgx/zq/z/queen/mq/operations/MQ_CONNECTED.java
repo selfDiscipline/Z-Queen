@@ -46,6 +46,9 @@ import com.tgx.zq.z.queen.io.inf.ISessionCreator;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X104_ExchangeIdentity;
 import com.tgx.zq.z.queen.mq.server.MqServer;
 
+/**
+ * @author William.d.zk
+ */
 public enum MQ_CONNECTED
         implements
         IEventOp<Pair<IConnected, OPERATION_MODE>, AsynchronousSocketChannel>

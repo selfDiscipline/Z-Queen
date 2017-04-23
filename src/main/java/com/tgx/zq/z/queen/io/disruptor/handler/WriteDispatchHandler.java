@@ -38,6 +38,9 @@ import com.tgx.zq.z.queen.base.util.Triple;
 import com.tgx.zq.z.queen.io.impl.AioSession;
 import com.tgx.zq.z.queen.io.inf.ICommand;
 
+/**
+ * @author William.d.zk
+ */
 public class WriteDispatchHandler
         implements
         IPipeEventHandler<QEvent, QEvent>

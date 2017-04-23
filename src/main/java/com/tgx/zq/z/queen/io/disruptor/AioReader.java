@@ -35,6 +35,9 @@ import com.tgx.zq.z.queen.base.disruptor.inf.IError;
 import com.tgx.zq.z.queen.io.disruptor.operations.READ_ERROR_OPERATOR;
 import com.tgx.zq.z.queen.io.inf.ISession;
 
+/**
+ * @author William.d.zk
+ */
 public enum AioReader
         implements
         CompletionHandler<Integer, ISession>

@@ -28,6 +28,9 @@ import java.io.InputStream;
 
 import com.tgx.zq.z.queen.base.classic.task.AbstractResult;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class HttpPlugin
         extends
         AbstractResult

@@ -29,6 +29,9 @@ import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.io.ws.protocol.Command;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class X1X_ClusterExchange
         extends
         Command<WsContext>

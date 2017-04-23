@@ -25,6 +25,9 @@
 
 package com.tgx.zq.z.queen.io.ws.protocol.bean.mq;
 
+/**
+ * @author William.d.zk
+ */
 public class MqHttpFullMsg
 {
 

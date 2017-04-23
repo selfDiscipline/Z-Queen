@@ -31,6 +31,9 @@ import com.tgx.zq.z.queen.base.disruptor.inf.IEventOp;
 import com.tgx.zq.z.queen.base.util.Triple;
 import com.tgx.zq.z.queen.io.inf.ISession;
 
+/**
+ * @author William.d.zk
+ */
 public enum WROTE_ERROR_OPERATOR
         implements
         IEventOp<Throwable, ISession>

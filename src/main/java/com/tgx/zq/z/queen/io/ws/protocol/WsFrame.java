@@ -29,6 +29,9 @@ import com.tgx.zq.z.queen.base.inf.ISerialTick;
 import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.io.inf.IProtocol;
 
+/**
+ * @author William.d.zk
+ */
 public class WsFrame
         implements
         IReset,

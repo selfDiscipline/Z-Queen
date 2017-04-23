@@ -31,7 +31,7 @@ import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
 /**
- * Created by Zhangzhuo on 2017/4/1.
+ * @author William.d.zk
  */
 public class ConsoleErrorHandler
         extends

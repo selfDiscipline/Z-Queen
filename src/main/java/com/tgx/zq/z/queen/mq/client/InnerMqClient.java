@@ -54,6 +54,9 @@ import com.tgx.zq.z.queen.io.ws.protocol.bean.mq.X80_MqTopicReg;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.mq.X81_MqTopicRegResult;
 import com.tgx.zq.z.queen.mq.operations.MQ_READ;
 
+/**
+ * @author William.d.zk
+ */
 class InnerMqClient
 {
     private final static String   ConfigFileName = "MqClientConfig";

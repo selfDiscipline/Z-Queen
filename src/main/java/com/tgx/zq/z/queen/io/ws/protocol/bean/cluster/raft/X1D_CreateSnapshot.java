@@ -25,6 +25,9 @@
 
 package com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft;
 
+/**
+ * @author William.d.zk
+ */
 public class X1D_CreateSnapshot
         extends
         X1X_ClusterExchange

@@ -24,6 +24,9 @@
  */
 package com.tgx.zq.z.queen.base.util;
 
+/**
+ * @author William.d.zk
+ */
 public class Square<FIRST, SECOND, THIRD, FOURTH>
 {
     private FIRST  first;

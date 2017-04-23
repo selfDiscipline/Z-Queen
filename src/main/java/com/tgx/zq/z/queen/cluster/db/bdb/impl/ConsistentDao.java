@@ -46,6 +46,9 @@ import com.tgx.zq.z.queen.cluster.replication.bean.raft.MetaEntry;
 import com.tgx.zq.z.queen.cluster.replication.bean.raft.SnapShotEntry;
 import com.tgx.zq.z.queen.db.bdb.inf.IDbStorageProtocol;
 
+/**
+ * @author William.d.zk
+ */
 public class ConsistentDao<E extends IDbStorageProtocol>
 {
     private final Environment                       _Environment;

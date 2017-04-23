@@ -42,6 +42,9 @@ import com.tgx.zq.z.queen.io.impl.AioSessionManager;
 import com.tgx.zq.z.queen.io.inf.ICreatorFactory;
 import com.tgx.zq.z.queen.io.inf.ISession;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class QueenManager
         extends
         AioSessionManager

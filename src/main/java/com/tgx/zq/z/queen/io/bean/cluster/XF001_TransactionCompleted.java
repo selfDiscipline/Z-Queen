@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.io.bean.cluster;
 
 import com.tgx.zq.z.queen.io.bean.XFFFF_InnerCommand;
 
+/**
+ * @author William.d.zk
+ */
 public class XF001_TransactionCompleted
         extends
         XFFFF_InnerCommand

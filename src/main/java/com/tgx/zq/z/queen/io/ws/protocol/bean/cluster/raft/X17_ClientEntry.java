@@ -28,6 +28,9 @@ package com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft;
 import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.cluster.replication.bean.raft.LogEntry;
 
+/**
+ * @author William.d.zk
+ */
 public class X17_ClientEntry
         extends
         X1X_ClusterExchange

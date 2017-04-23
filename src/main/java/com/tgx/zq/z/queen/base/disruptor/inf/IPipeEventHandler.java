@@ -31,6 +31,9 @@ import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.InsufficientCapacityException;
 import com.lmax.disruptor.RingBuffer;
 
+/**
+ * @author William.d.zk
+ */
 public interface IPipeEventHandler<T extends IEvent, R extends IEvent>
         extends
         EventHandler<T>

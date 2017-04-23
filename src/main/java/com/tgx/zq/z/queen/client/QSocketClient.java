@@ -24,6 +24,9 @@
  */
 package com.tgx.zq.z.queen.client;
 
+/**
+ * @author William.d.zk
+ */
 public class QSocketClient
 
 {

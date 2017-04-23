@@ -33,6 +33,9 @@ import com.tgx.zq.z.queen.base.util.NtruUtil;
 import com.tgx.zq.z.queen.base.util.Pair;
 import com.tgx.zq.z.queen.io.inf.IEncryptHandler;
 
+/**
+ * @author William.d.zk
+ */
 public class EncryptHandler
         implements
         IEncryptHandler

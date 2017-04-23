@@ -28,6 +28,9 @@ import static java.lang.System.arraycopy;
 
 import java.util.Arrays;
 
+/**
+ * @author William.d.zk
+ */
 public class ArrayUtil
 {
     public static long[] setFiFoAdd(long _l, long[] a) {

@@ -40,6 +40,9 @@ import com.tgx.zq.z.queen.io.inf.ISessionDismiss;
 import com.tgx.zq.z.queen.io.manager.QueenManager;
 import com.tgx.zq.z.queen.mq.server.MqServer;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class BizNode<E extends IDbStorageProtocol, D extends IBizDao<E>>
         extends
         QueenManager
@@ -51,10 +54,10 @@ public abstract class BizNode<E extends IDbStorageProtocol, D extends IBizDao<E>
 {
 
     private final ClusterNode<E, D, ? extends BizNode<E, D>> mClusterNode;
-    private final D                                   mBizDao;
-    private final MqServer<E, D>                      mMqServer = new MqServer<E, D>(this)
-                                                                {
-                                                                };
+    private final D                                          mBizDao;
+    private final MqServer<E, D>                             mMqServer = new MqServer<E, D>(this)
+                                                                       {
+                                                                       };
 
     public BizNode(final ClusterNode<E, D, ? extends BizNode<E, D>> clusterNode,
                    final Map<Long, ISession> sessionMap,

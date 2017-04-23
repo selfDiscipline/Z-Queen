@@ -61,6 +61,9 @@ import com.tgx.zq.z.queen.io.inf.ISessionDismiss;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X101_Close;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X104_ExchangeIdentity;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class LinkHandler<E extends IDbStorageProtocol, D extends IBizDao<E>, N extends BizNode<E, D>>
         implements
         IPipeEventHandler<QEvent, QEvent>,

@@ -42,6 +42,9 @@ import com.tgx.zq.z.queen.io.inf.IConnected;
 import com.tgx.zq.z.queen.io.inf.IPoS;
 import com.tgx.zq.z.queen.io.inf.ISession;
 
+/**
+ * @author William.d.zk
+ */
 class AioWorker
         extends
         Thread

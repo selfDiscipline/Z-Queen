@@ -32,6 +32,9 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.mq.X80_MqTopicReg;
 import com.tgx.zq.z.queen.mq.MqMode;
 
+/**
+ * @author William.d.zk
+ */
 public class MqClient
         extends
         InnerMqClient

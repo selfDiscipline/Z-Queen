@@ -34,6 +34,9 @@ import com.tgx.zq.z.queen.base.classic.task.TaskService;
 import com.tgx.zq.z.queen.base.classic.task.timer.TimerTask;
 import com.tgx.zq.z.queen.base.constant.QueenCode;
 
+/**
+ * @author William.d.zk
+ */
 public class TimeUtil
 {
     public final static long        ZERO_AFTER_UTC_DELTA      = 1483228800000L;

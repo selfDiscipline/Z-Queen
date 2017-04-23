@@ -33,6 +33,9 @@ import com.tgx.zq.z.queen.io.impl.AioContext;
 import com.tgx.zq.z.queen.io.inf.IConnectMode;
 import com.tgx.zq.z.queen.io.inf.ISessionOption;
 
+/**
+ * @author William.d.zk
+ */
 public class WsContext
         extends
         AioContext

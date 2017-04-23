@@ -30,6 +30,9 @@ import java.util.Random;
 
 import com.tgx.zq.z.queen.base.crypt.inf.ISymmetric;
 
+/**
+ * @author William.d.zk
+ */
 public class Rc4
         implements
         ISymmetric

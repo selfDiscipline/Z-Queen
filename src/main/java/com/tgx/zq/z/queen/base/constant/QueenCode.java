@@ -24,6 +24,9 @@
  */
 package com.tgx.zq.z.queen.base.constant;
 
+/**
+ * @author William.d.zk
+ */
 public class QueenCode
 {
     public final static long CM_XID                               = 0x8000000000000000L;

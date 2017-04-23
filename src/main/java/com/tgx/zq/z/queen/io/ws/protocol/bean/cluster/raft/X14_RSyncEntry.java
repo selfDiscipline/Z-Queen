@@ -29,6 +29,9 @@ import com.tgx.zq.z.queen.base.inf.ISerialTick;
 import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.cluster.replication.bean.raft.LogEntry;
 
+/**
+ * @author William.d.zk
+ */
 public class X14_RSyncEntry
         extends
         X1X_ClusterExchange

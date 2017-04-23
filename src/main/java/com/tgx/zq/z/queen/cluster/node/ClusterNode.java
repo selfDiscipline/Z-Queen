@@ -105,6 +105,9 @@ import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X19_LeadLease;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X1A_LeaseAck;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X102_Ping;
 
+/**
+ * @author William.d.zk
+ */
 public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN extends BizNode<E, D>>
         extends
         QueenManager
@@ -141,9 +144,6 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     private final Map<Long, Integer>         _SlotNewMajorityAppendCountMap = new HashMap<>(1 << 8);
     private final Map<Long, Integer>         _SlotOldMajorityAppendCountMap = new HashMap<>(1 << 8);
     private final TaskService                _TaskService                   = TaskService.getInstance();
-    private InetSocketAddress                mLocalAddress;
-    private AsynchronousServerSocketChannel  mServerChannel;
-    private BN                               mBizNode;
     private final ISessionCreator            _Creator                       = new AioCreator(SOCKET_OPTION_ATTR_FILE_NAME)
                                                                             {
                                                                                 @Override
@@ -164,7 +164,9 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                                                                                 }
 
                                                                             };
-
+    private InetSocketAddress                mLocalAddress;
+    private AsynchronousServerSocketChannel  mServerChannel;
+    private BN                               mBizNode;
     private long                             mTermId                        = -1L;
     private long                             mBallotId;
     private long                             mSlotIndex                     = -1L;
@@ -782,8 +784,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
             /* new config session */
             if (nodeEntity == null) nodeEntity = _NewNodesStateMap.get(nodeId);
             /*
-             * nodeEntity in old config ,its session count isn't negative.
-             * nodeEntity in new config ,after its session count equals zero
+             * nodeEntity in old config ,its session count isn't negative. nodeEntity in new config ,after its session count equals zero
              * that remove it
              */
             if (nodeEntity == null) log.severe("session is not in config old either new !");
@@ -856,14 +857,14 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     }
 
     @Override
-    public long getClientNextSlot() {
-        return mClientNextSlot;
-    }
-
-    @Override
     public void setClientSlotIndex(long slotIndex) {
         mClientSlotIndex = slotIndex;
         mClientNextSlot = mClientSlotIndex + 1;
+    }
+
+    @Override
+    public long getClientNextSlot() {
+        return mClientNextSlot;
     }
 
     @Override

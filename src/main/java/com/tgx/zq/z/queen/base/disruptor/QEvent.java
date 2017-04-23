@@ -33,6 +33,9 @@ import com.tgx.zq.z.queen.base.inf.IReset;
 import com.tgx.zq.z.queen.base.util.Pair;
 import com.tgx.zq.z.queen.base.util.Triple;
 
+/**
+ * @author William.d.zk
+ */
 public class QEvent
         implements
         IReset,

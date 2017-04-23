@@ -49,6 +49,9 @@ import com.tgx.zq.z.queen.io.inf.ISession;
 import com.tgx.zq.z.queen.io.inf.ISessionDismiss;
 import com.tgx.zq.z.queen.io.inf.ISessionOption;
 
+/**
+ * @author William.d.zk
+ */
 public class AioSession
         implements
         ISession

@@ -36,6 +36,9 @@ import com.sleepycat.je.EnvironmentLockedException;
 import com.sleepycat.je.EnvironmentNotFoundException;
 import com.sleepycat.je.VersionMismatchException;
 
+/**
+ * @author William.d.zk
+ */
 public class BerkeleyDBEnv
 {
     private final Logger log = Logger.getLogger(BerkeleyDBEnv.class.getSimpleName());

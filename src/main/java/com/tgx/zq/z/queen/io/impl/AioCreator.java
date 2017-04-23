@@ -30,6 +30,9 @@ import java.util.concurrent.TimeUnit;
 import com.tgx.zq.z.queen.base.util.Configuration;
 import com.tgx.zq.z.queen.io.inf.ISessionCreator;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class AioCreator
         implements
         ISessionCreator

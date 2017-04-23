@@ -55,6 +55,9 @@ import com.tgx.zq.z.queen.base.inf.IDisposable;
  * 在多Task.threadID!=0条件下会出现线程池的并发线程过多的问题 请自行在业务逻辑中谨慎使用Task.threadID用以避免业务流同步处理事宜
  *
  *
+ * 
+ * @author William.d.zk
+ * 
  * @version 0.9.1
  * @since 2013-2-11
  */

@@ -41,6 +41,9 @@ import com.tgx.zq.z.queen.io.inf.IContext;
 import com.tgx.zq.z.queen.io.inf.IContext.EncodeState;
 import com.tgx.zq.z.queen.io.inf.ISession;
 
+/**
+ * @author William.d.zk
+ */
 public class EncodeHandler
         implements
         EventHandler<QEvent>

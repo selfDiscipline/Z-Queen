@@ -69,6 +69,9 @@ import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X102_Ping;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X104_ExchangeIdentity;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X200_HandShake;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class AioSingleClient
         implements
         ICreatorFactory,
@@ -78,7 +81,6 @@ public abstract class AioSingleClient
         IPipeWrite,
         ITaskListener
 {
-    protected Logger                          log               = Logger.getLogger(getClass().getSimpleName());
     private final int                         _BindSerial;
     private final String                      _ClientLocalAddress;
     private final String[]                    _ServerAddress;
@@ -93,6 +95,7 @@ public abstract class AioSingleClient
     private final long                        _Identity;
     private final Map<Integer, IChannelLogic> _LogicMap         = new ConcurrentSkipListMap<>();
     private final IConnectMode.OPERATION_MODE _Mode;
+    protected Logger                          log               = Logger.getLogger(getClass().getSimpleName());
 
     public AioSingleClient(final long _XID, IConnectMode.OPERATION_MODE mode, String localBind, String... address) throws IOException {
         if (address == null || address.length == 0) throw new NullPointerException();

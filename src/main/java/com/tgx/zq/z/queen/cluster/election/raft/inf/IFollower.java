@@ -31,6 +31,9 @@ import com.tgx.zq.z.queen.cluster.replication.bean.raft.LogEntry;
 import com.tgx.zq.z.queen.db.bdb.inf.IDbStorageProtocol;
 import com.tgx.zq.z.queen.io.inf.ICommand;
 
+/**
+ * @author William.d.zk
+ */
 public interface IFollower<E extends IDbStorageProtocol>
         extends
         ITaskListener

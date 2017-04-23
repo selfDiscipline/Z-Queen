@@ -42,6 +42,9 @@ import com.tgx.zq.z.queen.io.inf.IConnectActive;
 import com.tgx.zq.z.queen.io.inf.IConnected;
 import com.tgx.zq.z.queen.io.inf.ISessionCreator;
 
+/**
+ * @author William.d.zk
+ */
 public class AioConnector
         implements
         IConnectActive,

@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.base.util;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+/**
+ * @author William.d.zk
+ */
 public class Configuration
 {
 

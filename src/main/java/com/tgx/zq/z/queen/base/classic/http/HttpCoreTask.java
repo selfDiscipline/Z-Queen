@@ -62,6 +62,9 @@ import org.apache.hc.core5.http.protocol.RequestUserAgent;
 
 import com.tgx.zq.z.queen.base.classic.task.Task;
 
+/**
+ * @author William.d.zk
+ */
 public class HttpCoreTask
         extends
         Task

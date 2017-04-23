@@ -42,6 +42,9 @@ import com.tgx.zq.z.queen.io.inf.IDestine;
 import com.tgx.zq.z.queen.io.inf.IDestine.RESULT;
 import com.tgx.zq.z.queen.io.inf.ISession;
 
+/**
+ * @author William.d.zk
+ */
 public class ReadDispatchHandler
         implements
         IPipeEventHandler<QEvent, QEvent>

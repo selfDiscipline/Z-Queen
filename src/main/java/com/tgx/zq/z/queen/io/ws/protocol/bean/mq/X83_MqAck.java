@@ -32,15 +32,18 @@ import com.tgx.zq.z.queen.io.inf.IQoS;
 import com.tgx.zq.z.queen.io.ws.protocol.Command;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
 
+/**
+ * @author William.d.zk
+ */
 public class X83_MqAck
         extends
         Command<WsContext>
 {
     public final static int COMMAND = 0x83;
     public long             deviceIdx;
-    public long             startMsgUID;             // 包含本身
-    public long             endMsgUID;                     // 包含本身
-    public byte[]           msgUIDs;                             // 9byte一组:0-8byte为msgUID,9byte为status
+    public long             startMsgUID;                // 包含本身
+    public long             endMsgUID;                          // 包含本身
+    public byte[]           msgUIDs;                                    // 9byte一组:0-8byte为msgUID,9byte为status
     private int             mMsgUIDsLength;
 
     public X83_MqAck() {

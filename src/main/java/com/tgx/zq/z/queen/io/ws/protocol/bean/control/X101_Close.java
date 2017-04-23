@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.io.ws.protocol.bean.control;
 import com.tgx.zq.z.queen.io.ws.protocol.WsControl;
 import com.tgx.zq.z.queen.io.ws.protocol.WsFrame;
 
+/**
+ * @author William.d.zk
+ */
 public class X101_Close
         extends
         WsControl

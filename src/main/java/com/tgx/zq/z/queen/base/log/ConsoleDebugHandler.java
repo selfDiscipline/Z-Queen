@@ -30,6 +30,9 @@ import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
+/**
+ * @author William.d.zk
+ */
 public class ConsoleDebugHandler
         extends
         StreamHandler

@@ -26,6 +26,9 @@ package com.tgx.zq.z.queen.base.classic.task.inf;
 
 import com.tgx.zq.z.queen.base.classic.task.Task;
 
+/**
+ * @author William.d.zk
+ */
 public interface ITaskFactory<S, I, F, T extends Task>
 {
     byte rmsType = 1, httpType = rmsType + 1, socketType = httpType + 1, fileType = socketType + 1, smsType = fileType + 1,

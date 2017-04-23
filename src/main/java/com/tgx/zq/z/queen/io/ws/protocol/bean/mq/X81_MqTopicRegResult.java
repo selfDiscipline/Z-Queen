@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.io.ws.protocol.bean.mq;
 
 import com.tgx.zq.z.queen.base.util.IoUtil;
 
+/**
+ * @author William.d.zk
+ */
 public class X81_MqTopicRegResult
         extends
         X8X_MqExchange

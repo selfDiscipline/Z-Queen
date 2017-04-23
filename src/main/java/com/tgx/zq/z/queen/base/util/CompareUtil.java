@@ -28,6 +28,9 @@ package com.tgx.zq.z.queen.base.util;
 import java.util.Iterator;
 import java.util.SortedSet;
 
+/**
+ * @author William.d.zk
+ */
 public class CompareUtil
 {
     public final static <E> boolean isDeepEquals(SortedSet<E> o, SortedSet<E> d) {

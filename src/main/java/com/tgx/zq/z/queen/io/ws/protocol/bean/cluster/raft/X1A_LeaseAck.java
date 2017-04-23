@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft;
 
 import com.tgx.zq.z.queen.base.util.IoUtil;
 
+/**
+ * @author William.d.zk
+ */
 public class X1A_LeaseAck
         extends
         X1X_ClusterExchange

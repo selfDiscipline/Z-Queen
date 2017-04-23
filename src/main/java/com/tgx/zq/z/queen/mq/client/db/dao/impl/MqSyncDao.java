@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.mq.client.db.dao.impl;
 
 import com.sleepycat.je.Environment;
 
+/**
+ * @author William.d.zk
+ */
 public class MqSyncDao
 {
     public MqSyncDao(Environment env, long nodeId) {

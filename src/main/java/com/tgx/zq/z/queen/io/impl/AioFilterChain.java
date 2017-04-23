@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.io.impl;
 import com.tgx.zq.z.queen.io.inf.IContext;
 import com.tgx.zq.z.queen.io.inf.IFilterChain;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class AioFilterChain<C extends IContext>
         implements
         IFilterChain<C>

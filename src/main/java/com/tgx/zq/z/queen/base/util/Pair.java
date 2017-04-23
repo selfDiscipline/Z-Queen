@@ -26,6 +26,9 @@ package com.tgx.zq.z.queen.base.util;
 
 import com.tgx.zq.z.queen.base.inf.IDisposable;
 
+/**
+ * @author William.d.zk
+ */
 public class Pair<FIRST, SECOND>
         implements
         IDisposable,

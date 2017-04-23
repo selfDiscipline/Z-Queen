@@ -31,6 +31,9 @@ import com.tgx.zq.z.queen.io.inf.IQoS;
 import com.tgx.zq.z.queen.io.ws.protocol.Command;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
 
+/**
+ * @author William.d.zk
+ */
 public class X81_MqPull
         extends
         Command<WsContext>

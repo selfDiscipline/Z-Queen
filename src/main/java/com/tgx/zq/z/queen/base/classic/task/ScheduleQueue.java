@@ -33,6 +33,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * @author William.d.zk
+ */
 public class ScheduleQueue<E extends Task>
 {
     final static long             AbsoluteTimeAwait    = 0;

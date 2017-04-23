@@ -39,6 +39,9 @@ import com.tgx.zq.z.queen.io.ws.protocol.WsFrame;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X200_HandShake;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X201_SslHandShake;
 
+/**
+ * @author William.d.zk
+ */
 public class WsFrameFilter
         extends
         AioFilterChain<WsContext>

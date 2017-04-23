@@ -28,6 +28,9 @@ import java.nio.ByteBuffer;
 
 import com.tgx.zq.z.queen.io.inf.IPoS;
 
+/**
+ * @author William.d.zk
+ */
 public class AioPackage
         implements
         IPoS

@@ -32,6 +32,9 @@ import com.tgx.zq.z.queen.io.inf.IRouteLv4;
 import com.tgx.zq.z.queen.io.inf.ISession;
 import com.tgx.zq.z.queen.io.inf.IStreamProtocol;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class Command<C extends WsContext>
         implements
         ICommand,

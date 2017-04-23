@@ -26,6 +26,9 @@ package com.tgx.zq.z.queen.io.ws.protocol;
 
 import com.tgx.zq.z.queen.io.inf.ICommand;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class WsHandshake
         implements
         ICommand

@@ -28,6 +28,9 @@ import java.util.concurrent.TimeUnit;
 
 import com.tgx.zq.z.queen.base.classic.task.inf.ITaskTimeout;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class AbstractTimeOut<E extends Task>
         implements
         ITaskTimeout<E>

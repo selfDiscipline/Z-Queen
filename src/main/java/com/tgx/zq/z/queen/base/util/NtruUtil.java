@@ -37,6 +37,9 @@ import com.securityinnovation.jNeo.Random;
 import com.securityinnovation.jNeo.ntruencrypt.KeyParams;
 import com.securityinnovation.jNeo.ntruencrypt.NtruEncryptKey;
 
+/**
+ * @author William.d.zk
+ */
 public class NtruUtil
 {
     static boolean     LOADEDLIB = false;

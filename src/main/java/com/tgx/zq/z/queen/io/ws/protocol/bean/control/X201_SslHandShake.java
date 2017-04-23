@@ -26,6 +26,9 @@ package com.tgx.zq.z.queen.io.ws.protocol.bean.control;
 
 import com.tgx.zq.z.queen.io.ws.protocol.WsHandshake;
 
+/**
+ * @author William.d.zk
+ */
 public class X201_SslHandShake
         extends
         WsHandshake

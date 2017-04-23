@@ -54,6 +54,9 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class ClusterHandler<E extends IDbStorageProtocol, D extends IBizDao<E>, N extends BizNode<E, D>>
         implements
         IPipeEventHandler<QEvent, QEvent>,

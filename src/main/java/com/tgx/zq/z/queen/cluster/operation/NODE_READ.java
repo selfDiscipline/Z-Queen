@@ -39,6 +39,9 @@ import com.tgx.zq.z.queen.io.ws.filter.ZCommandFilter;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.*;
 
+/**
+ * @author William.d.zk
+ */
 public enum NODE_READ
         implements
         IEventOp<IPoS, ISession>,

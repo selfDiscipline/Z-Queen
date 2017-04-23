@@ -29,6 +29,9 @@ import com.sleepycat.je.Environment;
 import com.tgx.zq.z.queen.db.bdb.inf.IBizDao;
 import com.tgx.zq.z.queen.db.bdb.inf.IDbStorageProtocol;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class BizDao<E extends IDbStorageProtocol>
         implements
         IBizDao<E>

@@ -26,6 +26,9 @@ package com.tgx.zq.z.queen.base.classic.task;
 
 import com.tgx.zq.z.queen.base.classic.task.inf.ITaskListener;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class AbstractListener
         implements
         ITaskListener

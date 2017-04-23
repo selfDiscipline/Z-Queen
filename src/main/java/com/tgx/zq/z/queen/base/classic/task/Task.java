@@ -45,6 +45,8 @@ import com.tgx.zq.z.queen.base.classic.task.inf.ITaskWakeTimer;
  * 6:{@code notifyObserver()}; 尽在 TaskService.processor 中使用<br>
  * 
  *
+ * @author William.d.zk
+ * 
  */
 public abstract class Task
         extends

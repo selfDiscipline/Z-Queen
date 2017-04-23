@@ -28,6 +28,9 @@ import java.util.concurrent.TimeUnit;
 
 import com.tgx.zq.z.queen.base.classic.task.Task;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class TimerTask
         extends
         Task

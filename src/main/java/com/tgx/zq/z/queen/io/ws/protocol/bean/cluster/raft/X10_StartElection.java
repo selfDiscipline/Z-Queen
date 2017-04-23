@@ -28,6 +28,9 @@ package com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft;
 import com.tgx.zq.z.queen.base.util.ArrayUtil;
 import com.tgx.zq.z.queen.base.util.IoUtil;
 
+/**
+ * @author William.d.zk
+ */
 public class X10_StartElection
         extends
         X1X_ClusterExchange

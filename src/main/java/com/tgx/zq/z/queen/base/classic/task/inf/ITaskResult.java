@@ -29,6 +29,9 @@ import java.util.Map;
 import com.tgx.zq.z.queen.base.inf.IDisposable;
 import com.tgx.zq.z.queen.base.inf.ISerialTick;
 
+/**
+ * @author William.d.zk
+ */
 public interface ITaskResult
         extends
         IDisposable,

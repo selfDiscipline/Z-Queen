@@ -28,6 +28,9 @@ import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.io.ws.protocol.Command;
 import com.tgx.zq.z.queen.io.ws.protocol.ZContext;
 
+/**
+ * @author William.d.zk
+ */
 public class X02_AsymmetricPub
         extends
         Command<ZContext>

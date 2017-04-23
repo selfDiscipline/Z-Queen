@@ -41,12 +41,15 @@ import com.tgx.zq.z.queen.io.inf.IContext.DecodeState;
 import com.tgx.zq.z.queen.io.inf.IPoS;
 import com.tgx.zq.z.queen.io.inf.ISession;
 
+/**
+ * @author William.d.zk
+ */
 public class DecodeHandler
         implements
         EventHandler<QEvent>
 {
-    Logger                       log             = Logger.getLogger(getClass().getName());
     private final EncryptHandler _EncryptHandler = new EncryptHandler();
+    Logger                       log             = Logger.getLogger(getClass().getName());
 
     @Override
     public void onEvent(QEvent event, long sequence, boolean batch) throws Exception {

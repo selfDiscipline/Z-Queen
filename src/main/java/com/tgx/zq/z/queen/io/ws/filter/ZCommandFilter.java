@@ -48,13 +48,16 @@ import com.tgx.zq.z.queen.io.ws.protocol.bean.tls.X04_EncryptConfirm;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.tls.X05_EncryptStart;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.tls.X06_PlainStart;
 
+/**
+ * @author William.d.zk
+ */
 public class ZCommandFilter
         extends
         AioFilterChain<WsContext>
 {
 
-    Logger                       log = Logger.getLogger(getClass().getSimpleName());
     private final CommandFactory factory;
+    Logger                       log = Logger.getLogger(getClass().getSimpleName());
 
     public ZCommandFilter() {
         this(null);

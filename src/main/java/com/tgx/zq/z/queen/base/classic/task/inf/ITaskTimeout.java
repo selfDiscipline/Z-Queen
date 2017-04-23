@@ -28,8 +28,9 @@ import com.tgx.zq.z.queen.base.classic.task.Task;
 
 /**
  * 某一类型的Task存在超时过程时所需要执行的行为规范
- * 
  *
+ * @author William.d.zk
+ * 
  * @see #doTimeout(Task)
  * @see #onInvalid(Task)
  * @see #cancel()

@@ -70,6 +70,9 @@ import com.tgx.zq.z.queen.mq.operations.MQ_CONNECTED;
 import com.tgx.zq.z.queen.mq.operations.MQ_CONNECT_ERROR;
 import com.tgx.zq.z.queen.mq.operations.MQ_READ;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class MqServer<E extends IDbStorageProtocol, D extends IBizDao<E>>
         implements
         IAioServer,

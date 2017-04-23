@@ -36,6 +36,9 @@ import com.tgx.zq.z.queen.io.ws.protocol.bean.mq.X80_MqTopicReg;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.mq.X82_MqPush;
 import com.tgx.zq.z.queen.mq.MqMode;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class MqChannel
         implements
         AioSingleClient.IChannelLogic

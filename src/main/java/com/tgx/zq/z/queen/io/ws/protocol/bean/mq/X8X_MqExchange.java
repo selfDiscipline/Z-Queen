@@ -30,6 +30,9 @@ import com.tgx.zq.z.queen.io.ws.protocol.Command;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
 import com.tgx.zq.z.queen.io.ws.protocol.WsFrame;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class X8X_MqExchange
         extends
         Command<WsContext>

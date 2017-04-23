@@ -33,6 +33,9 @@ import com.tgx.zq.z.queen.db.bdb.inf.IDbStorageProtocol;
 import com.tgx.zq.z.queen.io.inf.ICommand;
 import com.tgx.zq.z.queen.io.ws.protocol.WsContext;
 
+/**
+ * @author William.d.zk
+ */
 public interface IClient<E extends IDbStorageProtocol>
         extends
         ITaskListener
@@ -50,7 +53,7 @@ public interface IClient<E extends IDbStorageProtocol>
 
     long getClientSlotIndex();
 
-    long getClientNextSlot();
-
     void setClientSlotIndex(long slotIndex);
+
+    long getClientNextSlot();
 }

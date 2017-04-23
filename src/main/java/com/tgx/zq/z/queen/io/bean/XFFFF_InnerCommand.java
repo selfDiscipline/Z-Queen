@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.io.bean;
 
 import com.tgx.zq.z.queen.io.inf.ICommand;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class XFFFF_InnerCommand
         implements
         ICommand

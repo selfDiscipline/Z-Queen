@@ -29,6 +29,9 @@ import static java.lang.System.arraycopy;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+/**
+ * @author William.d.zk
+ */
 public class IoUtil
 {
     private static final char HEX_DIGITS[] = { '0',

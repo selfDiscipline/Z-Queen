@@ -29,6 +29,9 @@ import java.util.Map;
 
 import com.tgx.zq.z.queen.base.classic.task.inf.ITaskResult;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class AbstractResult
         implements
         ITaskResult

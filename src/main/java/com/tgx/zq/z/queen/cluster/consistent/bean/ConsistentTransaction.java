@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.cluster.consistent.bean;
 
 import com.tgx.zq.z.queen.io.inf.IValid;
 
+/**
+ * @author William.d.zk
+ */
 public class ConsistentTransaction<E extends IValid>
 {
     private final long _TransactionKey, _Timeout;

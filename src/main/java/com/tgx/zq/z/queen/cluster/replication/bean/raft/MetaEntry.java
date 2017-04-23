@@ -31,6 +31,9 @@ import com.tgx.zq.z.queen.base.inf.IDisposable;
 import com.tgx.zq.z.queen.base.util.IoUtil;
 import com.tgx.zq.z.queen.db.bdb.inf.IDbStorageProtocol;
 
+/**
+ * @author William.d.zk
+ */
 public class MetaEntry
         implements
         IDisposable,

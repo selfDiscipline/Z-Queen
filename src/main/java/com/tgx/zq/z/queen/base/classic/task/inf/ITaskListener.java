@@ -26,6 +26,9 @@ package com.tgx.zq.z.queen.base.classic.task.inf;
 
 import com.tgx.zq.z.queen.base.classic.task.TaskService;
 
+/**
+ * @author William.d.zk
+ */
 public interface ITaskListener
 {
     /**

@@ -40,6 +40,9 @@ import com.tgx.zq.z.queen.io.inf.ICommand;
 import com.tgx.zq.z.queen.io.inf.ISession;
 import com.tgx.zq.z.queen.io.inf.ISessionManager;
 
+/**
+ * @author William.d.zk
+ */
 public abstract class AioSessionManager
         implements
         ISessionManager

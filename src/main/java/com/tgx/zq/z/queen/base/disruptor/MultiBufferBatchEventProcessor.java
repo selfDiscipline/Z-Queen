@@ -36,6 +36,9 @@ import com.lmax.disruptor.Sequence;
 import com.lmax.disruptor.SequenceBarrier;
 import com.lmax.disruptor.TimeoutException;
 
+/**
+ * @author William.d.zk
+ */
 public class MultiBufferBatchEventProcessor<T>
         implements
         EventProcessor
