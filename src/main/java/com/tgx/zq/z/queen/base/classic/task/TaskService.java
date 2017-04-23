@@ -68,35 +68,35 @@ public class TaskService
         IDisposable
 {
 
-    final static byte                             SERVICE_TASK_INIT      = -1;
-    final static byte                             SERVICE_PROCESSING     = SERVICE_TASK_INIT + 1;
-    final static byte                             SERVICE_SCHEDULE       = SERVICE_PROCESSING + 1;
-    final static byte                             SERVICE_NOTIFYOBSERVER = SERVICE_SCHEDULE + 1;
-    final static byte                             SERVICE_DOWN           = -128;
-    final static byte                             LISTENER_INITIAL_NUM   = 7;
-    private static final int                      COUNT_BITS             = Integer.SIZE - 3;
-    private static final int                      CAPACITY               = (1 << COUNT_BITS) - 1;
-    private static final int                      RUNNING                = -1 << COUNT_BITS;
-    private static final int                      SHUTDOWN               = 0 << COUNT_BITS;
-    private static final int                      STOP                   = 1 << COUNT_BITS;
-    private static final int                      TIDYING                = 2 << COUNT_BITS;
-    private static final int                      TERMINATED             = 3 << COUNT_BITS;
-    protected static AtomicReference<TaskService> _AInstance             = new AtomicReference<TaskService>();
-    protected final ScheduleQueue<Task>           mainQueue;
-    final Processor                               processor;
-    final HashMap<Integer, ITaskListener>         listeners;
-    final ConcurrentLinkedQueue<ITaskResult>      responseQueue;
-    final ReentrantLock                           mainLock               = new ReentrantLock();
-    final ReentrantLock                           runLock                = new ReentrantLock();
+    final static byte                             SERVICE_TASK_INIT       = -1;
+    final static byte                             SERVICE_PROCESSING      = SERVICE_TASK_INIT + 1;
+    final static byte                             SERVICE_SCHEDULE        = SERVICE_PROCESSING + 1;
+    final static byte                             SERVICE_NOTIFY_OBSERVER = SERVICE_SCHEDULE + 1;
+    final static byte                             SERVICE_DOWN            = -128;
+    final static byte                             LISTENER_INITIAL_NUM    = 7;
+    private static final int                      COUNT_BITS              = Integer.SIZE - 3;
+    private static final int                      CAPACITY                = (1 << COUNT_BITS) - 1;
+    private static final int                      RUNNING                 = -1 << COUNT_BITS;
+    private static final int                      SHUTDOWN                = 0 << COUNT_BITS;
+    private static final int                      STOP                    = 1 << COUNT_BITS;
+    private static final int                      TIDYING                 = 2 << COUNT_BITS;
+    private static final int                      TERMINATED              = 3 << COUNT_BITS;
+    protected static AtomicReference<TaskService> _AInstance              = new AtomicReference<TaskService>();
+    protected final ScheduleQueue<Task>           _MainQueue;
+    final Processor                               _Processor;
+    final HashMap<Integer, ITaskListener>         _Listeners;
+    final ConcurrentLinkedQueue<ITaskResult>      _ResponseQueue;
+    final ReentrantLock                           _MainLock               = new ReentrantLock();
+    final ReentrantLock                           _RunLock                = new ReentrantLock();
     // #debug fatal
-    String                                        tag                    = "TS";
+    String                                        tag                     = "TS";
     private ITaskListener                         recycleListener;
 
     private TaskService() {
-        listeners = new HashMap<>(LISTENER_INITIAL_NUM);
-        mainQueue = new ScheduleQueue<>(this, this);
-        responseQueue = new ConcurrentLinkedQueue<>();
-        processor = new Processor();
+        _Listeners = new HashMap<>(LISTENER_INITIAL_NUM);
+        _MainQueue = new ScheduleQueue<>(this, this);
+        _ResponseQueue = new ConcurrentLinkedQueue<>();
+        _Processor = new Processor();
     }
 
     public static TaskService getInstance(boolean newInstance) {
@@ -105,7 +105,7 @@ public class TaskService
                 if (_AInstance.get() != null) return _AInstance.get();
                 if (_AInstance.compareAndSet(null, new TaskService())) return _AInstance.get();
             }
-            else new NullPointerException("No create mService!");
+            else new NullPointerException("No create _Service!");
         }
         return _AInstance.get();
     }
@@ -142,14 +142,14 @@ public class TaskService
      * TaskService 启动函数 在此之前需要将listener都加入到监听队列中
      */
     public final void startService() {
-        if (processor.processing) return;
-        processor.start();
+        if (_Processor.processing) return;
+        _Processor.start();
         Thread.yield();
     }
 
     public final void stopService() {
-        processor.processing = false;
-        processor.interrupt();
+        _Processor.processing = false;
+        _Processor.interrupt();
     }
 
     protected void setScheduleAlarmTime(long RTC_WakeTime) {
@@ -192,11 +192,11 @@ public class TaskService
 
     public final boolean addListener(ITaskListener listener) {
         if (listener == null) throw new NullPointerException();
-        ReentrantLock mainLock = this.mainLock;
+        ReentrantLock mainLock = this._MainLock;
         if (mainLock.tryLock()) try {
-            Set<Integer> keySet = listeners.keySet();
+            Set<Integer> keySet = _Listeners.keySet();
             if (listener.getBindSerial() == 0 || keySet.contains(listener.getBindSerial())) { return false; }
-            listeners.put(listener.getBindSerial(), listener);
+            _Listeners.put(listener.getBindSerial(), listener);
             return true;
         }
         finally {
@@ -207,10 +207,10 @@ public class TaskService
 
     public final void forceAddListener(ITaskListener listener) {
         if (listener == null) throw new NullPointerException();
-        ReentrantLock mainLock = this.mainLock;
+        ReentrantLock mainLock = this._MainLock;
         mainLock.lock();
         try {
-            Set<Integer> keySet = listeners.keySet();
+            Set<Integer> keySet = _Listeners.keySet();
             if (listener.getBindSerial() == 0 || keySet.contains(listener.getBindSerial())) {
                 System.err.println(listener.getClass().getSimpleName()
                                    + "@"
@@ -218,7 +218,7 @@ public class TaskService
                                    + " bindSerial error : "
                                    + listener.getBindSerial());
             }
-            listeners.put(listener.getBindSerial(), listener);
+            _Listeners.put(listener.getBindSerial(), listener);
         }
         finally {
             mainLock.unlock();
@@ -231,9 +231,9 @@ public class TaskService
 
     public final ITaskListener removeListener(int bindSerial) {
         if (bindSerial == 0) return null;
-        ReentrantLock mainLock = this.mainLock;
+        ReentrantLock mainLock = this._MainLock;
         if (mainLock.tryLock()) try {
-            return listeners.remove(bindSerial);
+            return _Listeners.remove(bindSerial);
         }
         finally {
             mainLock.unlock();
@@ -243,10 +243,10 @@ public class TaskService
 
     public final ITaskListener forceRemoveListener(int bindSerial) {
         if (bindSerial == 0) return null;
-        ReentrantLock mainLock = this.mainLock;
+        ReentrantLock mainLock = this._MainLock;
         mainLock.lock();
         try {
-            return listeners.remove(bindSerial);
+            return _Listeners.remove(bindSerial);
         }
         finally {
             mainLock.unlock();
@@ -255,7 +255,7 @@ public class TaskService
 
     // TODO
     public boolean hasThisTask(Task task) {
-        return this.mainQueue.hasThis(task);
+        return this._MainQueue.hasThis(task);
     }
 
     public final boolean requestService(Task task, boolean schedule) {
@@ -282,8 +282,8 @@ public class TaskService
         if (task.isInQueue() || task.isPending || task.isDone || task.isInit) return false;
         task.scheduleService = this;
         task.setListenSerial(listenerSerial);
-        ScheduleQueue<Task> mainQueue = this.mainQueue;
-        task.priority = schedule ? mainQueue.priorityIncrease.incrementAndGet() : 0;
+        ScheduleQueue<Task> mainQueue = this._MainQueue;
+        task.priority = schedule ? mainQueue._PriorityIncrease.incrementAndGet() : 0;
         boolean success = mainQueue.offer(task);
         return success;
     }
@@ -334,12 +334,12 @@ public class TaskService
      * @return
      */
     public final boolean cancelService(int threadID, int available, boolean schedule) {
-        if (processor == null || processor.executor == null) return true;// 没有需要关闭的服务，恒返回true
+        if (_Processor == null || _Processor.executor == null) return true;// 没有需要关闭的服务，恒返回true
         if (threadID != 0) {
-            final ReentrantLock lock = this.mainLock;
+            final ReentrantLock lock = this._MainLock;
             lock.lock();
             try {
-                TgxBlockingQueue btQueue = processor.executor.id2Queue.get(threadID);
+                TgxBlockingQueue btQueue = _Processor.executor.id2Queue.get(threadID);
                 if (btQueue != null) btQueue.clear();
             }
             finally {
@@ -360,7 +360,7 @@ public class TaskService
         if (taskResult == null) return false;
         if (taskResult.isResponsed() || taskResult.isCancelled()) return false;
         taskResult.lockResponse();
-        boolean offered = responseQueue.offer(taskResult);
+        boolean offered = _ResponseQueue.offer(taskResult);
         if (!offered) taskResult.unlockResponse();
         return offered;
     }
@@ -370,27 +370,27 @@ public class TaskService
     }
 
     protected final void wakeUp() {
-        if (processor != null && !processor.isInterrupted()) try {
-            processor.interrupt();
+        if (_Processor != null && !_Processor.isInterrupted()) try {
+            _Processor.interrupt();
         }
         catch (Exception e) {}
     }
 
     private final void notifyObserver() {
-        final ReentrantLock mainLock = this.mainLock;
+        final ReentrantLock mainLock = this._MainLock;
         mainLock.lock();
         ITaskResult receive = null;
         boolean isHandled = false;
         try {
-            while (!responseQueue.isEmpty()) {
-                receive = responseQueue.poll();
+            while (!_ResponseQueue.isEmpty()) {
+                receive = _ResponseQueue.poll();
                 receive.unlockResponse();
                 if (receive.isCancelled() || !receive.needHandle()) continue;
                 isHandled = false;
-                if (!listeners.isEmpty()) {
+                if (!_Listeners.isEmpty()) {
                     int listenSerial = receive.getListenSerial();
                     if (listenSerial != 0) {
-                        ITaskListener listener = listeners.get(listenSerial);
+                        ITaskListener listener = _Listeners.get(listenSerial);
                         if (listener != null && listener.isEnable()) try {
                             isHandled = isHandled(receive, listener);
                         }
@@ -404,7 +404,7 @@ public class TaskService
                         }
                         else {}
                     }
-                    if (!isHandled && receive.canOtherHandle()) for (ITaskListener listener : listeners.values()) {
+                    if (!isHandled && receive.canOtherHandle()) for (ITaskListener listener : _Listeners.values()) {
                         if (!listener.isEnable()) continue;
                         try {
                             isHandled = isHandled(receive, listener);
@@ -472,7 +472,7 @@ public class TaskService
         Executor         executor;
 
         public Processor() {
-            setName("taskService-processor");
+            setName("taskService-_Processor");
         }
 
         @Override
@@ -482,7 +482,7 @@ public class TaskService
 
         public final void run() {
             processing = true;
-            final ScheduleQueue<Task> mainQueue = TaskService.this.mainQueue;
+            final ScheduleQueue<Task> mainQueue = TaskService.this._MainQueue;
             Task curTask = null;
             byte serviceState = SERVICE_SCHEDULE;
             mainLoop:
@@ -542,7 +542,7 @@ public class TaskService
                                 serviceState = SERVICE_TASK_INIT;
                                 break processor_switch;
                             }
-                        case SERVICE_NOTIFYOBSERVER:
+                        case SERVICE_NOTIFY_OBSERVER:
                             notifyObserver();
                             serviceState = SERVICE_SCHEDULE;
                             break processor_switch;
@@ -792,9 +792,9 @@ public class TaskService
                 if (t != null) {
                     mainLock.lock();
                     try {
-                        // Recheck while holding lock.
+                        // Recheck while holding _Lock.
                         // Back out on ThreadFactory failure or if
-                        // shut down before lock acquired.
+                        // shut down before _Lock acquired.
                         int c = ctl.get();
                         int rs = runStateOf(c);
                         if (rs < SHUTDOWN || (rs == SHUTDOWN && firstTask == null)) {

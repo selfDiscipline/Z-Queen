@@ -28,6 +28,9 @@ import java.io.IOException;
 
 import com.tgx.zq.z.queen.io.disruptor.AioConnector;
 
+/**
+ * @author William.d.zk
+ */
 public interface IAioClient
         extends
         IConnected,

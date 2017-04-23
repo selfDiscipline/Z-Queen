@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.io.inf;
 
 import com.tgx.zq.z.queen.base.inf.IDisposable;
 
+/**
+ * @author William.d.zk
+ */
 public interface IFilterChain<C extends IContext>
         extends
         IFilter<C>,

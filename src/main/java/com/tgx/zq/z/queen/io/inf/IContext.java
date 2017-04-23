@@ -30,6 +30,9 @@ import java.nio.ByteBuffer;
 import com.tgx.zq.z.queen.base.inf.IDisposable;
 import com.tgx.zq.z.queen.base.inf.IReset;
 
+/**
+ * @author William.d.zk
+ */
 public interface IContext
         extends
         ITlsContext,

@@ -26,6 +26,9 @@ package com.tgx.zq.z.queen.io.inf;
 
 import com.tgx.zq.z.queen.io.impl.AioContext;
 
+/**
+ * @author William.d.zk
+ */
 public interface IStreamProtocol<C extends AioContext>
         extends
         IProtocol

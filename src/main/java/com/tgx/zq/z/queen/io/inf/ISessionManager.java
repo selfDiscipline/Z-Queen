@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.io.inf;
 import java.util.Collection;
 import java.util.Iterator;
 
+/**
+ * @author William.d.zk
+ */
 public interface ISessionManager
 {
     long INVALID_INDEX = -1;

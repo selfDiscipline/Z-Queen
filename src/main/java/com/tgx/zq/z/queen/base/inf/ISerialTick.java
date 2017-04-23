@@ -24,6 +24,9 @@
  */
 package com.tgx.zq.z.queen.base.inf;
 
+/**
+ * @author William.d.zk
+ */
 public interface ISerialTick
 {
     String CRLF_TAB = "\r\n\t";

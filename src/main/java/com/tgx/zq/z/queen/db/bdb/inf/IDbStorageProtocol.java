@@ -26,6 +26,9 @@ package com.tgx.zq.z.queen.db.bdb.inf;
 
 import com.tgx.zq.z.queen.io.inf.IProtocol;
 
+/**
+ * @author William.d.zk
+ */
 public interface IDbStorageProtocol
         extends
         IProtocol

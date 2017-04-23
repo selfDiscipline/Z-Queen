@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.io.inf;
 
 import com.tgx.zq.z.queen.base.util.IoUtil;
 
+/**
+ * @author William.d.zk
+ */
 public interface IPipeRead
 {
 

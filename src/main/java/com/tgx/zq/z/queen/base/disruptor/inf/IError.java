@@ -24,6 +24,9 @@
  */
 package com.tgx.zq.z.queen.base.disruptor.inf;
 
+/**
+ * @author William.d.zk
+ */
 public interface IError
 {
     Type getErrorType();

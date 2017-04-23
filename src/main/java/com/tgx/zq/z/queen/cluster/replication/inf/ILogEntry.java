@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.cluster.replication.inf;
 
 import com.tgx.zq.z.queen.db.bdb.inf.IDbStorageProtocol;
 
+/**
+ * @author William.d.zk
+ */
 public interface ILogEntry<E extends IDbStorageProtocol>
         extends
         IDbStorageProtocol

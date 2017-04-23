@@ -39,7 +39,7 @@ public class X82_MqPullResult
         Command<WsContext>
 {
     public final static int COMMAND = 0x82;
-    public byte[]           msgDetails;             // {long msgUID, int payloadLength, byte[] payload}为一组
+    public byte[]           msgDetails;                 // {long msgUID, int payloadLength, byte[] payload}为一组
 
     public X82_MqPullResult() {
         super(COMMAND, false);

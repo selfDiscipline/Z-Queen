@@ -26,6 +26,9 @@ package com.tgx.zq.z.queen.io.inf;
 
 import java.net.SocketAddress;
 
+/**
+ * @author William.d.zk
+ */
 public interface ICreatorFactory
 {
     ISessionCreator getCreator(SocketAddress address, IConnectMode.OPERATION_MODE mode);

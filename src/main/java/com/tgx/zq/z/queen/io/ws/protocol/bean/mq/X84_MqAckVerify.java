@@ -40,9 +40,9 @@ public class X84_MqAckVerify
 {
     public final static int COMMAND = 0x84;
     public long             deviceIdx;
-    public int              succeed;                                                    // ack是否成功,0:成功,1:失败
-    public long[]           ackMsgUIDs;                                     // 确认的msgUIDs
-    public long[]           gapMsgUIDs;                                     // 空缺的msgUIDs
+    public int              succeed;                                                              // ack是否成功,0:成功,1:失败
+    public long[]           ackMsgUIDs;                                            // 确认的msgUIDs
+    public long[]           gapMsgUIDs;                                            // 空缺的msgUIDs
     private int             mAckMsgUIDsLength;
     private int             mGapMsgUIDsLength;
 

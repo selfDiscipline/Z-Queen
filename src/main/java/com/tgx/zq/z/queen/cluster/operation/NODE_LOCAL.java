@@ -41,6 +41,9 @@ import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X15_CommitEntry;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.cluster.raft.X19_LeadLease;
 import com.tgx.zq.z.queen.io.ws.protocol.bean.control.X102_Ping;
 
+/**
+ * @author William.d.zk
+ */
 public enum NODE_LOCAL
         implements
         IEventOp<XF002_ClusterLocal, ClusterNode<?, ?, ?>>

@@ -29,6 +29,9 @@ import java.nio.channels.ShutdownChannelGroupException;
 import java.nio.channels.WritePendingException;
 import java.util.concurrent.RejectedExecutionException;
 
+/**
+ * @author William.d.zk
+ */
 public interface IWritable<A>
 {
     WRITE_STATUS write(IPoS ps, A attch) throws WritePendingException,

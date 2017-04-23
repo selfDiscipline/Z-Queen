@@ -28,6 +28,9 @@ import static com.tgx.zq.z.queen.io.inf.ITlsContext.EncryptState.PLAIN;
 
 import com.tgx.zq.z.queen.base.crypt.inf.ISymmetric;
 
+/**
+ * @author William.d.zk
+ */
 public interface ITlsContext
 {
 

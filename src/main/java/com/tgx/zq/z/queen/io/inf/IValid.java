@@ -25,6 +25,9 @@
 
 package com.tgx.zq.z.queen.io.inf;
 
+/**
+ * @author William.d.zk
+ */
 public interface IValid
 {
     default void setInValid() {

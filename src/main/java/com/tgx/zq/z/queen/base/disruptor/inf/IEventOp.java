@@ -28,6 +28,9 @@ import java.util.List;
 
 import com.tgx.zq.z.queen.base.util.Triple;
 
+/**
+ * @author William.d.zk
+ */
 public interface IEventOp<V, A>
 {
 

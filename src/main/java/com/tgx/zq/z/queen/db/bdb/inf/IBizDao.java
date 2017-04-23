@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.db.bdb.inf;
 
 import com.sleepycat.je.Environment;
 
+/**
+ * @author William.d.zk
+ */
 public interface IBizDao<E extends IDbStorageProtocol>
 {
     void close();

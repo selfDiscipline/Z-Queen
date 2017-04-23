@@ -34,6 +34,9 @@ import com.tgx.zq.z.queen.io.inf.ICommand;
 import com.tgx.zq.z.queen.io.inf.IDestine;
 import com.tgx.zq.z.queen.io.inf.ISession;
 
+/**
+ * @author William.d.zk
+ */
 public interface IConsistentRead<E extends IDbStorageProtocol, D extends IBizDao<E>, N extends BizNode<E, D>>
         extends
         IDestine

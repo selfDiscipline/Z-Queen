@@ -26,6 +26,9 @@ package com.tgx.zq.z.queen.io.inf;
 
 import java.nio.ByteBuffer;
 
+/**
+ * @author William.d.zk
+ */
 public interface IPoS
         extends
         IProtocol

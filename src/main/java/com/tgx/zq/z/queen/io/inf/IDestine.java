@@ -24,6 +24,9 @@
  */
 package com.tgx.zq.z.queen.io.inf;
 
+/**
+ * @author William.d.zk
+ */
 public interface IDestine
 {
     default RESULT trial(ICommand cmd, IConnectMode.OPERATION_MODE mode) {

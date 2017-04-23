@@ -28,6 +28,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.tgx.zq.z.queen.io.impl.AioSession;
 
+/**
+ * @author William.d.zk
+ */
 public interface IMultiCommand<T extends ICommand>
 {
     int sub_left = 12;

@@ -30,6 +30,9 @@ import com.tgx.zq.z.queen.base.util.Pair;
 import com.tgx.zq.z.queen.base.util.Triple;
 import com.tgx.zq.z.queen.io.inf.IConnectActive;
 
+/**
+ * @author William.d.zk
+ */
 public enum MQ_CONNECT_ERROR
         implements
         IEventOp<Pair<IConnectActive, Throwable>, IConnectActive>

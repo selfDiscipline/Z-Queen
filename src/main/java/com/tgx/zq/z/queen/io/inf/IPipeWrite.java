@@ -31,6 +31,9 @@ import java.nio.channels.ShutdownChannelGroupException;
 import java.nio.channels.WritePendingException;
 import java.util.concurrent.RejectedExecutionException;
 
+/**
+ * @author William.d.zk
+ */
 public interface IPipeWrite
 {
     default <C extends IContext> IProtocol filterWrite(IProtocol output, IFilterChain<C> filterChain, C context) {

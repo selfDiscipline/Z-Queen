@@ -26,6 +26,9 @@ package com.tgx.zq.z.queen.io.inf;
 
 import java.nio.channels.AsynchronousSocketChannel;
 
+/**
+ * @author William.d.zk
+ */
 public interface ISessionOption
 {
     int SO_TCP_MTU      = 1500 - 40;

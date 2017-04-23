@@ -30,6 +30,9 @@ import com.tgx.zq.z.queen.base.util.Triple;
 import com.tgx.zq.z.queen.cluster.node.ClusterNode;
 import com.tgx.zq.z.queen.io.inf.IConnectActive;
 
+/**
+ * @author William.d.zk
+ */
 public enum NODE_CONNECT_ERROR
         implements
         IEventOp<Pair<ClusterNode<?, ?, ?>, Throwable>, IConnectActive>

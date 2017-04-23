@@ -33,6 +33,9 @@ import com.tgx.zq.z.queen.base.disruptor.inf.IEventOp;
 import com.tgx.zq.z.queen.base.inf.IDisposable;
 import com.tgx.zq.z.queen.base.inf.IReset;
 
+/**
+ * @author William.d.zk
+ */
 public interface ISession
         extends
         IReset,

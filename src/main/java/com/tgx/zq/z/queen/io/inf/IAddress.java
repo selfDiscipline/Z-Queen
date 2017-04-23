@@ -26,6 +26,9 @@ package com.tgx.zq.z.queen.io.inf;
 
 import java.net.InetSocketAddress;
 
+/**
+ * @author William.d.zk
+ */
 public interface IAddress
 {
 

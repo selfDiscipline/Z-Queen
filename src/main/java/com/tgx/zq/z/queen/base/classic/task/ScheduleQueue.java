@@ -36,21 +36,21 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author William.d.zk
  */
-public class ScheduleQueue<E extends Task>
+class ScheduleQueue<E extends Task>
 {
-    final static long             AbsoluteTimeAwait    = 0;
-    final static long             AbsoluteTimeNowait   = -1;
-    transient final ReentrantLock lock                 = new ReentrantLock();
-    transient final Condition     available            = lock.newCondition();
-    final TreeSet<E>              tasksTree;
-    final TaskService             mService;
-    final AtomicInteger           priorityIncrease     = new AtomicInteger(0);
-    final AtomicLong              toWakeUpAbsoluteTime = new AtomicLong(-1);
+    final static long             AbsoluteTimeAwait     = 0;
+    final static long             AbsoluteTimeNowait    = -1;
+    transient final ReentrantLock _Lock                 = new ReentrantLock();
+    transient final Condition     _Available            = _Lock.newCondition();
+    final TreeSet<E>              _TasksTree;
+    final TaskService             _Service;
+    final AtomicInteger           _PriorityIncrease     = new AtomicInteger(0);
+    final AtomicLong              _ToWakeUpAbsoluteTime = new AtomicLong(-1);
     private int                   offerIndex;
 
-    public ScheduleQueue(Comparator<? super E> comparator, TaskService service) {
-        tasksTree = new TreeSet<E>(comparator);
-        this.mService = service;
+    ScheduleQueue(Comparator<? super E> comparator, TaskService service) {
+        _TasksTree = new TreeSet<E>(comparator);
+        this._Service = service;
     }
 
     /**
@@ -59,16 +59,16 @@ public class ScheduleQueue<E extends Task>
      *            {@code ?super Task}
      * @return <tt>True 成功插入 </tt> 由于此Queue使用Set特性,所以必须是!contain(<tt>param</tt>) 否则<tt>False</tt>
      */
-    public final boolean offer(E e) {
+    final boolean offer(E e) {
         if (e == null) return false;
-        final ReentrantLock lock = this.lock;
+        final ReentrantLock lock = this._Lock;
         lock.lock();
         try {
             E first = peek();
             e.inQueueIndex = ++offerIndex;
-            if (!tasksTree.add(e)) return false;
+            if (!_TasksTree.add(e)) return false;
             e.intoScheduleQueue();
-            if (first == null || tasksTree.comparator().compare(e, first) < 0) available.signalAll();
+            if (first == null || _TasksTree.comparator().compare(e, first) < 0) _Available.signalAll();
             return true;
         }
         finally {
@@ -76,15 +76,15 @@ public class ScheduleQueue<E extends Task>
         }
     }
 
-    private final boolean treeOffer(E e) {
+    private boolean treeOffer(E e) {
         if (e == null) return false;
-        final ReentrantLock lock = this.lock;
+        final ReentrantLock lock = this._Lock;
         lock.lock();
         try {
             E first = peek();
             e.inQueueIndex = ++offerIndex;
-            if (!tasksTree.add(e)) return false;
-            if (first == null || tasksTree.comparator().compare(e, first) < 0) available.signalAll();
+            if (!_TasksTree.add(e)) return false;
+            if (first == null || _TasksTree.comparator().compare(e, first) < 0) _Available.signalAll();
             return true;
         }
         finally {
@@ -94,27 +94,27 @@ public class ScheduleQueue<E extends Task>
 
     private E peek() {
         try {
-            return tasksTree.first();
+            return _TasksTree.first();
         }
         catch (NoSuchElementException e) {
             return null;
         }
     }
 
-    private final E pollFirst() {
+    private E pollFirst() {
         E first = peek();
         if (first == null) return null;
-        else if (tasksTree.remove(first)) {
+        else if (_TasksTree.remove(first)) {
             first.outScheduleQueue();
             return first;// remove操作应该会导致树的自平衡操作
         }
         return null;
     }
 
-    private final E treePoll() {
+    private E treePoll() {
         E first = peek();
         if (first == null) return null;
-        else if (tasksTree.remove(first)) return first;
+        else if (_TasksTree.remove(first)) return first;
         return null;
     }
 
@@ -124,7 +124,7 @@ public class ScheduleQueue<E extends Task>
      * @return queue 的头部 , or <tt>null</tt> 如果队列为空的话
      */
     public E poll() {
-        final ReentrantLock lock = this.lock;
+        final ReentrantLock lock = this._Lock;
         lock.lock();
         try {
             E first = peek();
@@ -132,7 +132,7 @@ public class ScheduleQueue<E extends Task>
             else {
                 E x = pollFirst();
                 assert x != null;
-                if (!isEmpty()) available.signalAll();
+                if (!isEmpty()) _Available.signalAll();
                 return x;
             }
         }
@@ -141,11 +141,11 @@ public class ScheduleQueue<E extends Task>
         }
     }
 
-    public final boolean replace(E e) {
-        final ReentrantLock lock = this.lock;
+    final boolean replace(E e) {
+        final ReentrantLock lock = this._Lock;
         lock.lock();
         try {
-            if (tasksTree.contains(e) && tasksTree.remove(e)) {
+            if (_TasksTree.contains(e) && _TasksTree.remove(e)) {
                 e.outScheduleQueue();
                 return offer(e);
             }
@@ -157,10 +157,10 @@ public class ScheduleQueue<E extends Task>
     }
 
     final boolean isEmpty() {
-        final ReentrantLock lock = this.lock;
+        final ReentrantLock lock = this._Lock;
         lock.lock();
         try {
-            return tasksTree.isEmpty();
+            return _TasksTree.isEmpty();
         }
         finally {
             lock.unlock();
@@ -168,36 +168,35 @@ public class ScheduleQueue<E extends Task>
     }
 
     final int size() {
-        return tasksTree.size();
+        return _TasksTree.size();
     }
 
     public final void clear() {
-        tasksTree.clear();
+        _TasksTree.clear();
     }
 
-    public final E take() throws InterruptedException {
-        final ReentrantLock lock = this.lock;
+    final E take() throws InterruptedException {
+        final ReentrantLock lock = this._Lock;
         lock.lockInterruptibly();
         try {
             while (true) {
                 E first = peek();
                 if (first == null) {
-                    priorityIncrease.set(1);
+                    _PriorityIncrease.set(1);
                     offerIndex = 0;
-                    mService.noScheduleAlarmTime();
-                    toWakeUpAbsoluteTime.set(AbsoluteTimeAwait);
-                    available.await();
+                    _Service.noScheduleAlarmTime();
+                    _ToWakeUpAbsoluteTime.set(AbsoluteTimeAwait);
+                    _Available.await();
                 }
                 else {
                     if (first.isCancelled()) {
                         pollFirst();
-                        System.out.println("remove task  when take()  " + first.hashCode());
                         continue;
                     }
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
                     boolean imReturn = first.isDone;
                     if (first.isToSchedule(delay) || imReturn) {
-                        toWakeUpAbsoluteTime.set(AbsoluteTimeNowait);
+                        _ToWakeUpAbsoluteTime.set(AbsoluteTimeNowait);
                         if (first.isToSchedule(delay)) {
                             ReentrantLock runLock = first.getLock();
                             runLock.lock();
@@ -205,7 +204,7 @@ public class ScheduleQueue<E extends Task>
                                 if (first.offTime > 0) {
                                     // update delay time
                                     E x = treePoll();
-                                    assert x != null;
+                                    // assert x != null;
                                     if (x == null || x != first) throw new NullPointerException("Check TreeSet.remove -> Compare(t1,t2)!");
                                     first.doTime += first.offTime;
                                     first.offTime = 0;
@@ -219,17 +218,16 @@ public class ScheduleQueue<E extends Task>
                             }
                         }
                         E x = pollFirst();
-                        assert x != null;
+                        // assert x != null;
                         if (x == null || x != first) throw new NullPointerException("Check TreeSet.remove -> Compare(t1,t2)!");
-                        if (!isEmpty()) available.signalAll();// 当此Queue作为单例并未由多个消费者进行并发操作时
-                                                              // 本块代码无价值~
+                        if (!isEmpty()) _Available.signalAll();// 当此Queue作为单例并未由多个消费者进行并发操作时 本块代码无价值~
                         return x;
                     }
                     else {
-                        priorityIncrease.set(1);
-                        toWakeUpAbsoluteTime.set(first.doTime);
-                        mService.setScheduleAlarmTime(first.doTime);
-                        available.awaitNanos(delay);
+                        _PriorityIncrease.set(1);
+                        _ToWakeUpAbsoluteTime.set(first.doTime);
+                        _Service.setScheduleAlarmTime(first.doTime);
+                        _Available.awaitNanos(delay);
                     }
                 }
             }
@@ -239,7 +237,7 @@ public class ScheduleQueue<E extends Task>
         }
     }
 
-    public boolean hasThis(E e) {
-        return tasksTree.contains(e);
+    boolean hasThis(E e) {
+        return _TasksTree.contains(e);
     }
 }

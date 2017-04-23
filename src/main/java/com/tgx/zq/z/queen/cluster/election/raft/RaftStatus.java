@@ -25,6 +25,9 @@
 
 package com.tgx.zq.z.queen.cluster.election.raft;
 
+/**
+ * @author William.d.zk
+ */
 public enum RaftStatus
 {
     CLIENT_RECEIVED,

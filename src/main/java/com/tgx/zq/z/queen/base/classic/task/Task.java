@@ -36,13 +36,13 @@ import com.tgx.zq.z.queen.base.classic.task.inf.ITaskWakeTimer;
 
 /**
  * Task 的生命周期 <br>
- * 1:{@code initTask()}; -> TaskService.processor 中执行 并在此进行任务执行空间的分发,是否进入Excutor来执行.由isBlock属性来决定 <br>
+ * 1:{@code initTask()}; -> TaskService._Processor 中执行 并在此进行任务执行空间的分发,是否进入Excutor来执行.由isBlock属性来决定 <br>
  * 2:{@code run()};<br>
  * 3:{@code afterRun()};<br>
  * 4:{@code finish()};<br>
  * -- Exception<br>
  * 5:{@code doAfterException()};<br>
- * 6:{@code notifyObserver()}; 尽在 TaskService.processor 中使用<br>
+ * 6:{@code notifyObserver()}; 尽在 TaskService._Processor 中使用<br>
  * 
  *
  * @author William.d.zk
@@ -54,8 +54,8 @@ public abstract class Task
         implements
         ITaskRun
 {
-    protected final transient ReentrantLock runLock;
-    protected final transient Condition     available;
+    protected final transient ReentrantLock _RunLock;
+    protected final transient Condition     _Available;
     public volatile int                     timeLimit, timeOut, threadId, priority;
     public Object                           attachment;
     public ITaskTimeout<Task>               timeoutCall;
@@ -86,8 +86,8 @@ public abstract class Task
         super();
         this.threadId = threadId;
         this.progress = progress;
-        runLock = new ReentrantLock();
-        available = runLock.newCondition();
+        _RunLock = new ReentrantLock();
+        _Available = _RunLock.newCondition();
     }
 
     /**
@@ -96,14 +96,14 @@ public abstract class Task
      * @return
      */
     public final ReentrantLock getLock() {
-        if (runLock == null) throw new NullPointerException();
-        return runLock;
+        if (_RunLock == null) throw new NullPointerException();
+        return _RunLock;
     }
 
     public final void setPriority(int priority) {
         if (priority != this.priority) {
             this.priority = priority;
-            scheduleService.mainQueue.replace(this);
+            scheduleService._MainQueue.replace(this);
         }
     }
 
@@ -202,12 +202,12 @@ public abstract class Task
         if (duration <= 0) return false;
         if (isInQueue()) // 不必判断ScheduleQueue的NULL
         {
-            if (runLock.tryLock()) try {
+            if (_RunLock.tryLock()) try {
                 offTime = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(duration, timeUnit) - doTime;
                 return true;
             }
             finally {
-                runLock.unlock();
+                _RunLock.unlock();
             }
             return false;
         }

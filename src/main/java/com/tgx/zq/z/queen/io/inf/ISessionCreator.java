@@ -31,6 +31,9 @@ import java.util.concurrent.TimeUnit;
 
 import com.tgx.zq.z.queen.base.util.Configuration;
 
+/**
+ * @author William.d.zk
+ */
 public interface ISessionCreator
         extends
         ISessionOption,

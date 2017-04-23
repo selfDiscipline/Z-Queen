@@ -36,58 +36,58 @@ public abstract class AbstractResult
         implements
         ITaskResult
 {
-    protected volatile boolean  disposable = true;
+    protected volatile boolean  disposable  = true;
     protected byte              handleCount;
-    private volatile boolean    isInResponseQueue;
-    private int                 bindSerial;
-    private volatile Exception  exception;
-    private boolean             onceHandle = true;
-    private Map<String, Object> attributes;
+    private volatile boolean    vIsInResponseQueue;
+    private int                 mBindSerial;
+    private volatile Exception  vException;
+    private boolean             mOnceHandle = true;
+    private Map<String, Object> mAttributes;
 
     /**
      * 任何获得isDisposable()接口许可 或者 在ResponseQueue中未经处理的Result都将默认执行此操作
      */
     @Override
     public void dispose() {
-        exception = null;
-        if (attributes != null) attributes.clear();
-        attributes = null;
+        vException = null;
+        if (mAttributes != null) mAttributes.clear();
+        mAttributes = null;
     }
 
     @Override
     public final void lockResponse() {
-        isInResponseQueue = true;
+        vIsInResponseQueue = true;
         handleCount = 0;
     }
 
     @Override
     public final void unlockResponse() {
-        isInResponseQueue = false;
+        vIsInResponseQueue = false;
     }
 
     @Override
     public final boolean isResponsed() {
-        return isInResponseQueue;
+        return vIsInResponseQueue;
     }
 
     @Override
     public final void onceOnly() {
-        onceHandle = true;
+        mOnceHandle = true;
     }
 
     @Override
     public boolean needHandle() {
-        return !onceHandle || (onceHandle && ++handleCount == 1);
+        return !mOnceHandle || (mOnceHandle && ++handleCount == 1);
     }
 
     @Override
     public final int getListenSerial() {
-        return bindSerial;
+        return mBindSerial;
     }
 
     @Override
     public final void setListenSerial(int bindSerial) {
-        this.bindSerial = bindSerial;
+        this.mBindSerial = bindSerial;
     }
 
     @Override
@@ -97,34 +97,34 @@ public abstract class AbstractResult
 
     @Override
     public final boolean hasError() {
-        return exception != null;
+        return vException != null;
     }
 
     @Override
     public final Exception getError() {
-        return exception;
+        return vException;
     }
 
     @Override
     public final void setError(Exception ex) {
-        exception = ex;
+        vException = ex;
     }
 
     @Override
     public final void setAttributes(Map<String, Object> map) {
-        attributes = map;
+        mAttributes = map;
     }
 
     @Override
     public final Object getAttribute(String key) {
-        if (attributes == null || attributes.isEmpty()) return null;
-        return attributes.get(key);
+        if (mAttributes == null || mAttributes.isEmpty()) return null;
+        return mAttributes.get(key);
     }
 
     @Override
     public final void setAttribute(String key, Object value) {
-        if (attributes == null) attributes = new HashMap<String, Object>(2, 0.5f);
-        attributes.put(key, value);
+        if (mAttributes == null) mAttributes = new HashMap<>(2, 0.5f);
+        mAttributes.put(key, value);
     }
 
     @Override

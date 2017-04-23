@@ -25,6 +25,9 @@
 
 package com.tgx.zq.z.queen.mq;
 
+/**
+ * @author William.d.zk
+ */
 public enum MqMode
 {
     UNKNOWN,

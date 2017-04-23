@@ -27,6 +27,9 @@ package com.tgx.zq.z.queen.io.inf;
 
 import com.tgx.zq.z.queen.base.disruptor.inf.IEventOp;
 
+/**
+ * @author William.d.zk
+ */
 public interface IConnected
         extends
         ICreatorFactory,
