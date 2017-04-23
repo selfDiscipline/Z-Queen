@@ -87,12 +87,6 @@ public class X02_AsymmetricPub
 
     @Override
     public String toString() {
-        return new StringBuilder(super.toString()).append("public-key-id:")
-                                                  .append(pubKeyId)
-                                                  .append(CRLFTAB)
-                                                  .append("public-key:")
-                                                  .append(IoUtil.bin2Hex(pubKey))
-                                                  .append(CRLFTAB)
-                                                  .toString();
+        return super.toString() + "public-key-id:" + pubKeyId + CRLF_TAB + "public-key:" + IoUtil.bin2Hex(pubKey) + CRLF_TAB;
     }
 }

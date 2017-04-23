@@ -49,13 +49,6 @@ public class X19_LeadLease
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(super.toString());
-        return sb.append("leader term: ")
-                 .append(termId)
-                 .append(ISerialTick.CRLFTAB)
-                 .append("leader last slot index")
-                 .append(slotIndex)
-                 .append(ISerialTick.CRLF)
-                 .toString();
+        return super.toString() + "leader term: " + termId + CRLF_TAB + "leader last slot index" + slotIndex + CRLF;
     }
 }

@@ -77,6 +77,6 @@ public class X05_EncryptStart
 
     @Override
     public String toString() {
-        return new StringBuilder(super.toString()).append("rc4key-id:").append(symmetricKeyId).append(CRLF).toString();
+        return super.toString() + "rc4key-id:" + symmetricKeyId + CRLF;
     }
 }

@@ -223,7 +223,7 @@ class Sha1
 
         int A, B, C, D, E;
 
-        /* init A - E */
+        /* initLeader A - E */
 
         A = state[0];
         B = state[1];

@@ -159,12 +159,12 @@ public abstract class Command<C extends WsContext>
         this.mTypeByte = type;
     }
 
-    protected int addCrc(byte[] data, int lastPos) {
+    private int addCrc(byte[] data, int lastPos) {
         lastPos += IoUtil.writeInt(CryptUtil.crc32(data, 0, lastPos), data, lastPos);
         return lastPos;
     }
 
-    protected int checkCrc(byte[] data, int lastPos) {
+    private int checkCrc(byte[] data, int lastPos) {
         int l_crc = CryptUtil.crc32(data, 0, lastPos);
         int crc = IoUtil.readInt(data, lastPos);
         if (l_crc != crc) throw new SecurityException("crc check failed!  =" + data[1]);
@@ -336,18 +336,16 @@ public abstract class Command<C extends WsContext>
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        return sb.append("CMD: X")
-                 .append(command < 0xF ? 0 : "")
-                 .append(Integer.toHexString(command).toUpperCase())
-                 .append(" Ver: ")
-                 .append(getVersion())
-                 .append(" Charset: ")
-                 .append(getCharset(mTypeByte))
-                 .append(" Serial: ")
-                 .append(I18nUtil.getSerialType(mTypeByte & 0x0F))
-                 .append(CRLFTAB)
-                 .toString();
+        return "CMD: X"
+               + (command < 0xF ? 0 : "")
+               + Integer.toHexString(command).toUpperCase()
+               + " Ver: "
+               + getVersion()
+               + " Charset: "
+               + getCharset(mTypeByte)
+               + " Serial: "
+               + I18nUtil.getSerialType(mTypeByte & 0x0F)
+               + CRLF_TAB;
     }
 
 }

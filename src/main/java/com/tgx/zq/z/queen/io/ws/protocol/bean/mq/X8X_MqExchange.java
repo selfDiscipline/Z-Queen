@@ -70,6 +70,6 @@ public abstract class X8X_MqExchange
 
     @Override
     public String toString() {
-        return new StringBuilder(super.toString()).append("channel:").append(channel).append(CRLFTAB).toString();
+        return new StringBuilder(super.toString()).append("channel:").append(channel).append(CRLF_TAB).toString();
     }
 }

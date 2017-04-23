@@ -95,17 +95,17 @@ public class X10_StartElection
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(super.toString());
-        return sb.append("last committed term id: ")
-                 .append(lastCommittedTermId)
-                 .append(CRLFTAB)
-                 .append("last committed slot index: ")
-                 .append(lastCommittedSlotIndex)
-                 .append("node cluster: ")
-                 .append(CRLFTAB)
-                 .append(ArrayUtil.toHexString(config))
-                 .append(CRLF)
-                 .toString();
+        return super.toString()
+               + "last committed term id: "
+               + lastCommittedTermId
+               + CRLF_TAB
+               + "last committed slot index: "
+               + lastCommittedSlotIndex
+               + "node cluster: "
+               + CRLF_TAB
+               + ArrayUtil.toHexString(config)
+               + CRLF;
+
     }
 
 }

@@ -78,7 +78,7 @@ public class X80_MqTopicReg
     public String toString() {
         return new StringBuilder(super.toString()).append("MQ-Client:")
                                                   .append(nodeId)
-                                                  .append(CRLFTAB)
+                                                  .append(CRLF_TAB)
                                                   .append("topic:")
                                                   .append(ArrayUtil.toHexString(topicKeys))
                                                   .append(CRLF)

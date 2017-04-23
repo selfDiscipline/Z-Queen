@@ -92,14 +92,14 @@ public class X14_RSyncEntry
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(super.toString()).append(ISerialTick.CRLFTAB)
-                                                              .append("Last committed slot index: ")
-                                                              .append(lastCommittedSlotIndex)
-                                                              .append(ISerialTick.CRLFTAB)
-                                                              .append("LogEntry: ")
-                                                              .append(getEntry().toString())
-                                                              .append(ISerialTick.CRLF);
-        return sb.toString();
+        return super.toString()
+               + CRLF_TAB
+               + "Last committed slot index: "
+               + lastCommittedSlotIndex
+               + CRLF_TAB
+               + "LogEntry: "
+               + getEntry().toString()
+               + CRLF;
     }
 
     public byte[] getPayload() {

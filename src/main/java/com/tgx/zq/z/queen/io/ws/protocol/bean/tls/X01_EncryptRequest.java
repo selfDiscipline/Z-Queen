@@ -65,6 +65,6 @@ public class X01_EncryptRequest
 
     @Override
     public String toString() {
-        return new StringBuilder(super.toString()).append("public-key-id:").append(pubKeyId).append(CRLFTAB).toString();
+        return super.toString() + "public-key-id:" + pubKeyId + CRLF_TAB;
     }
 }

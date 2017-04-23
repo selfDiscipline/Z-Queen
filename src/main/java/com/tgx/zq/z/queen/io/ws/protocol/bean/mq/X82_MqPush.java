@@ -68,7 +68,7 @@ public class X82_MqPush
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(super.toString());
-        sb.append(CRLFTAB).append("payload-> ").append(mSProtocol.toString()).append(CRLF);
+        sb.append(CRLF_TAB).append("payload-> ").append(mSProtocol.toString()).append(CRLF);
         return sb.toString();
     }
 }

@@ -25,9 +25,9 @@ package com.tgx.zq.z.queen.base.inf;
 
 public interface ISerialTick
 {
-    String CRLFTAB = "\r\n\t";
-    String CRLF    = "\r\n";
-    String TAB     = "\t";
+    String CRLF_TAB = "\r\n\t";
+    String CRLF     = "\r\n";
+    String TAB      = "\t";
 
     int getSerialNum();
 

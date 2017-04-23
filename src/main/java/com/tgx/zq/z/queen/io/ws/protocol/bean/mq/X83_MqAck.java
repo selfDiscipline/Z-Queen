@@ -127,16 +127,16 @@ public class X83_MqAck
         StringBuilder sb = new StringBuilder(super.toString());
         sb.append("device register index: ")
           .append(deviceIdx)
-          .append(CRLFTAB)
+          .append(CRLF_TAB)
           .append("message count: ")
           .append(mMsgUIDsLength)
-          .append(CRLFTAB)
+          .append(CRLF_TAB)
           .append("start msgUID: ")
           .append(startMsgUID)
-          .append(CRLFTAB)
+          .append(CRLF_TAB)
           .append("end msgUID: ")
           .append(endMsgUID)
-          .append(CRLFTAB)
+          .append(CRLF_TAB)
           .append(Arrays.toString(msgUIDs))
           .append(CRLF);
         return sb.toString();

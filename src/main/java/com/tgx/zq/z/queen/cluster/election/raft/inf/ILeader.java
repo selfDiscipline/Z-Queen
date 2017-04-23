@@ -96,5 +96,5 @@ public interface ILeader<E extends IDbStorageProtocol>
 
     void revertFollower();
 
-    void init();
+    void initLeader();
 }

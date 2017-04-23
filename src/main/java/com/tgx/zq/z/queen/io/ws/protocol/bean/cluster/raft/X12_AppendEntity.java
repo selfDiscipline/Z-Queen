@@ -117,13 +117,12 @@ public class X12_AppendEntity
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer(super.toString());
-        sb.append("last committed slot index: ").append(lastCommittedSlotIndex).append(ISerialTick.CRLFTAB);
+        String st = super.toString() + "last committed slot index: " + lastCommittedSlotIndex + CRLF_TAB;
         if (mPayloadLength > 0) {
             LogEntry<?> entry = new LogEntry<>();
             entry.decode(mPayload);
-            sb.append(entry.toString()).append(ISerialTick.CRLF);
+            st += entry.toString() + CRLF;
         }
-        return sb.toString();
+        return st;
     }
 }

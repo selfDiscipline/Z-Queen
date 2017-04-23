@@ -72,18 +72,17 @@ public class X13_EntryAck
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(super.toString());
-        return sb.append("result:")
-                 .append(accept ? "accept" : "reject")
-                 .append(CRLFTAB)
-                 .append(qualify ? "qualify" : "disqualify")
-                 .append(CRLFTAB)
-                 .append("next index: ")
-                 .append(nextIndex)
-                 .append(CRLFTAB)
-                 .append("last committed slot: ")
-                 .append(lastCommittedSlotIndex)
-                 .append(CRLF)
-                 .toString();
+        return super.toString()
+               + "result:"
+               + (accept ? "accept" : "reject")
+               + CRLF_TAB
+               + (qualify ? "qualify" : "disqualify")
+               + CRLF_TAB
+               + "next index: "
+               + nextIndex
+               + CRLF_TAB
+               + "last committed slot: "
+               + lastCommittedSlotIndex
+               + CRLF;
     }
 }

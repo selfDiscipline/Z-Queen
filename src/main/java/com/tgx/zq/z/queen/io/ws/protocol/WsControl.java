@@ -91,9 +91,7 @@ public abstract class WsControl
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
         int command = getSerialNum();
-        sb.append("CMD: X").append(command < 0xF ? 0 : "").append(Integer.toHexString(command).toUpperCase()).append(ISerialTick.CRLFTAB);
-        return sb.toString();
+        return "CMD: X" + (command < 0xF ? 0 : "") + Integer.toHexString(command).toUpperCase() + CRLF_TAB;
     }
 }

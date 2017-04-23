@@ -91,15 +91,15 @@ public class X04_EncryptConfirm
 
     @Override
     public String toString() {
-        return new StringBuilder(super.toString()).append("code: ")
-                                                  .append(QueenCode.parseRCode(response))
-                                                  .append(CRLFTAB)
-                                                  .append("rc4key-id: ")
-                                                  .append(symmetricKeyId)
-                                                  .append(CRLFTAB)
-                                                  .append("sign: ")
-                                                  .append(IoUtil.bin2Hex(mSign))
-                                                  .append(CRLF)
-                                                  .toString();
+        return super.toString()
+               + "code: "
+               + QueenCode.parseRCode(response)
+               + CRLF_TAB
+               + "rc4key-id: "
+               + symmetricKeyId
+               + CRLF_TAB
+               + "sign: "
+               + IoUtil.bin2Hex(mSign)
+               + CRLF;
     }
 }

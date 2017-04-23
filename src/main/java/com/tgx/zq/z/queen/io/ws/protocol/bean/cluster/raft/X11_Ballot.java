@@ -67,17 +67,16 @@ public class X11_Ballot
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(super.toString());
-        return sb.append("node :")
-                 .append(Long.toHexString(nodeId).toUpperCase())
-                 .append(CRLFTAB)
-                 .append("result:")
-                 .append(accept ? "accept" : "reject")
-                 .append(CRLFTAB)
-                 .append("vote for : ")
-                 .append(Long.toHexString(ballotId).toUpperCase())
-                 .append(CRLF)
-                 .toString();
+        return super.toString()
+               + "node :"
+               + Long.toHexString(nodeId).toUpperCase()
+               + CRLF_TAB
+               + "result:"
+               + (accept ? "accept" : "reject")
+               + CRLF_TAB
+               + "vote for : "
+               + Long.toHexString(ballotId).toUpperCase()
+               + CRLF;
 
     }
 }

@@ -598,42 +598,40 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
 
     @Override
     public String toString() {
-        String CRLF = "\r\n", CRLFTAB = "\r\n\t";
-        StringBuilder sb = new StringBuilder(CRLF);
-        sb.append(" ClusterNode: ")
-          .append(Long.toHexString(getIdentity()))
-          .append(" Majority: ")
-          .append(_Majority.get())
-          .append(" New-Majority: ")
-          .append(_NewMajority.get())
-          .append(" Stage: ")
-          .append(_Stage.get().name())
-          .append(" Status: ")
-          .append(mStatus.name())
-          .append(CRLFTAB)
-          .append(" BallotId: ")
-          .append(mBallotId)
-          .append(CRLFTAB)
-          .append(" SlotIndex: ")
-          .append(mSlotIndex)
-          .append(CRLFTAB)
-          .append(" NextSlot: ")
-          .append(mNextSlot)
-          .append(CRLFTAB)
-          .append(" TermId: ")
-          .append(mTermId)
-          .append(CRLFTAB)
-          .append(" LastCommittedTermId: ")
-          .append(mLastCommittedTermId)
-          .append(CRLFTAB)
-          .append(" LastCommittedSlotIndex: ")
-          .append(mLastCommittedSlotIndex)
-          .append(CRLFTAB)
-          .append(" ClientSlotIndex: ")
-          .append(mClientSlotIndex)
-          .append(CRLF);
-
-        return sb.toString();
+        String CRLF = "\r\n", CRLF_TAB = "\r\n\t";
+        return CRLF
+               + " ClusterNode: "
+               + Long.toHexString(getIdentity())
+               + " Majority: "
+               + _Majority.get()
+               + " New-Majority: "
+               + _NewMajority.get()
+               + " Stage: "
+               + _Stage.get().name()
+               + " Status: "
+               + mStatus.name()
+               + CRLF_TAB
+               + " BallotId: "
+               + mBallotId
+               + CRLF_TAB
+               + " SlotIndex: "
+               + mSlotIndex
+               + CRLF_TAB
+               + " NextSlot: "
+               + mNextSlot
+               + CRLF_TAB
+               + " TermId: "
+               + mTermId
+               + CRLF_TAB
+               + " LastCommittedTermId: "
+               + mLastCommittedTermId
+               + CRLF_TAB
+               + " LastCommittedSlotIndex: "
+               + mLastCommittedSlotIndex
+               + CRLF_TAB
+               + " ClientSlotIndex: "
+               + mClientSlotIndex
+               + CRLF;
     }
 
     @Override
@@ -818,7 +816,7 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                 break;
             case LEADER:
                 leaderLease();
-                init();
+                initLeader();
             default:
                 break;
         }
@@ -954,9 +952,11 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
     /*-----------------------------------------------------ILeader------------------------------------------------------*/
 
     @Override
-    public void init() {
+    public void initLeader() {
         _SlotOldMajorityAppendCountMap.clear();
         _SlotNewMajorityAppendCountMap.clear();
+        setStatus(RaftStatus.LEADER_LEASE);
+        log.info(toString());
     }
 
     @Override
@@ -1186,7 +1186,6 @@ public class ClusterNode<E extends IDbStorageProtocol, D extends IBizDao<E>, BN 
                                 long lastCommittedSlotIndex) {
         X19_LeadLease x19 = new X19_LeadLease(getNewMsgUid(), leaderId, termId, lastCommittedSlotIndex);
         broadcast.sendAll(wList, x19);
-        setStatus(RaftStatus.LEADER_LEASE);
         return wList;
     }
 

@@ -78,12 +78,6 @@ public class X03_Cipher
 
     @Override
     public String toString() {
-        return new StringBuilder(super.toString()).append("public-key-id:")
-                                                  .append(pubKeyId)
-                                                  .append(ISerialTick.CRLFTAB)
-                                                  .append("rc4key-id:")
-                                                  .append(symmetricKeyId)
-                                                  .append(ISerialTick.CRLF)
-                                                  .toString();
+        return super.toString() + "public-key-id:" + pubKeyId + CRLF_TAB + "rc4key-id:" + symmetricKeyId + CRLF;
     }
 }

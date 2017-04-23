@@ -68,7 +68,7 @@ public class X81_MqTopicRegResult
         StringBuilder sb = new StringBuilder(super.toString());
         if (topicErrors == null) sb.append("topic register ok");
         else {
-            sb.append("error/server topic").append(CRLFTAB).append('[');
+            sb.append("error/server topic").append(CRLF_TAB).append('[');
             int var3 = 0;
             while (true) {
                 sb.append(Integer.toHexString(topicErrors[var3] & 0xFF).toUpperCase());

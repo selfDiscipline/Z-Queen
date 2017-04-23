@@ -239,7 +239,7 @@ class Sha256
 
         int A, B, C, D, E, F, G, H;
 
-        /* init A - H */
+        /* initLeader A - H */
 
         A = state[0];
         B = state[1];

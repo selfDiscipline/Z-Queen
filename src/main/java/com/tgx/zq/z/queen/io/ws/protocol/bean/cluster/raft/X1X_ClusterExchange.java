@@ -86,13 +86,13 @@ public abstract class X1X_ClusterExchange
         StringBuilder sb = new StringBuilder(super.toString());
         return sb.append("node id: ")
                  .append(Long.toHexString(nodeId).toUpperCase())
-                 .append(CRLFTAB)
+                 .append(CRLF_TAB)
                  .append("current term id: ")
                  .append(termId)
-                 .append(CRLFTAB)
+                 .append(CRLF_TAB)
                  .append("slot index: ")
                  .append(slotIndex)
-                 .append(CRLFTAB)
+                 .append(CRLF_TAB)
                  .toString();
     }
 

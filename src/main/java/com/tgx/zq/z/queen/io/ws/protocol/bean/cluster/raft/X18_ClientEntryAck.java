@@ -80,18 +80,17 @@ public class X18_ClientEntryAck
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(super.toString());
-        return sb.append("result:")
-                 .append(accept ? "accept" : "reject")
-                 .append(CRLFTAB)
-                 .append(qualify ? "qualify" : "disqualify")
-                 .append(CRLFTAB)
-                 .append("client slot index: ")
-                 .append(clientSlotIndex)
-                 .append(CRLFTAB)
-                 .append("leader last committed slot index")
-                 .append(lastCommittedSlotIndex)
-                 .append(CRLF)
-                 .toString();
+        return super.toString()
+               + "result:"
+               + (accept ? "accept" : "reject")
+               + CRLF_TAB
+               + (qualify ? "qualify" : "disqualify")
+               + CRLF_TAB
+               + "client slot index: "
+               + clientSlotIndex
+               + CRLF_TAB
+               + "leader last committed slot index"
+               + lastCommittedSlotIndex
+               + CRLF;
     }
 }
