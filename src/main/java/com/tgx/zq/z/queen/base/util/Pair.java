@@ -70,12 +70,12 @@ public class Pair<FIRST, SECOND>
 
     @Override
     public boolean equals(Object obj) {
-        boolean objEquals = super.equals(obj);
-        if (!objEquals && obj instanceof Pair) {
-            @SuppressWarnings("rawtypes")
-            Pair other = (Pair) obj;
-            objEquals = other.first() == first() && other.second() == second();
+        if (obj == null || !(obj instanceof Pair)) { return false; }
+        if (this != obj) {
+            @SuppressWarnings("unchecked")
+            Pair<FIRST, SECOND> other = (Pair<FIRST, SECOND>) obj;
+            return first.equals(other.first) && second.equals(other.second);
         }
-        return objEquals;
+        return true;
     }
 }
