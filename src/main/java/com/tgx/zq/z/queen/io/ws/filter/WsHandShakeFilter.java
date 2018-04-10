@@ -205,10 +205,9 @@ public class WsHandShakeFilter
                     }
 
                 }
-
                 if (!recvBuf.hasRemaining()) return ResultType.NEED_DATA;
             }
-
+            return ResultType.NEED_DATA;
         }
         return ResultType.IGNORE;
     }
