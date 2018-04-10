@@ -25,6 +25,7 @@
 package com.tgx.zq.z.queen.io.ws.filter;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import com.tgx.zq.z.queen.base.constant.QueenCode;
@@ -71,7 +72,8 @@ public class ZCommandFilter
     @Override
     public ResultType preEncode(WsContext context, IProtocol output) {
         if (output == null || context == null) return ResultType.ERROR;
-        if (!context.getEncodeState().equals(EncodeState.ENCODING_FRAME)) return ResultType.IGNORE;
+        if (!context.getEncodeState()
+                    .equals(EncodeState.ENCODING_FRAME)) return ResultType.IGNORE;
         if (!(output instanceof ISerialTick)) return ResultType.ERROR;
         ISerialTick tick = (ISerialTick) output;
         switch (tick.getSuperSerialNum()) {
@@ -89,7 +91,8 @@ public class ZCommandFilter
     @Override
     public ResultType preDecode(WsContext context, IProtocol input) {
         if (context == null || input == null) return ResultType.ERROR;
-        if (!context.getDecodeState().equals(DecodeState.DECODING_FRAME)) return ResultType.IGNORE;
+        if (!context.getDecodeState()
+                    .equals(DecodeState.DECODING_FRAME)) return ResultType.IGNORE;
         if (!(input instanceof WsFrame)) return ResultType.ERROR;
         WsFrame frame = (WsFrame) input;
         return frame.isNoCtrl() ? ResultType.HANDLED : ResultType.IGNORE;
@@ -111,6 +114,7 @@ public class ZCommandFilter
         int command = frame.getPayload()[1] & 0xFF;
         @SuppressWarnings("unchecked")
         Command<WsContext> _command = (Command<WsContext>) createCommand(command);
+        if (Objects.isNull(_command)) return null;
         _command.decode(frame.getPayload(), context);
         ICommand inCommand = _command;
         switch (command) {
@@ -130,7 +134,8 @@ public class ZCommandFilter
                 X02_AsymmetricPub x02 = (X02_AsymmetricPub) inCommand;
                 encryptHandler = context.getEncryptHandler();
                 if (encryptHandler == null) return new X06_PlainStart(QueenCode.PLAIN_UNSUPPORTED);
-                byte[] symmetricKey = context.getSymmetricEncrypt().createKey("z-tls-rc4");
+                byte[] symmetricKey = context.getSymmetricEncrypt()
+                                             .createKey("z-tls-rc4");
                 if (symmetricKey == null) throw new NullPointerException("create symmetric-key failed!");
                 keyPair = encryptHandler.getCipher(x02.pubKey, symmetricKey);
                 if (keyPair != null) {
